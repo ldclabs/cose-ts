@@ -1,0 +1,96 @@
+{
+  "name": "@ldclabs/cose-ts",
+  "type": "module",
+  "version": "0.1.0",
+  "author": "0xZensh <txr1883@gmail.com>",
+  "description": "Implemented Keys, Algorithms (RFC9053), COSE (RFC9052) and CWT (RFC8392) in TypeScript.",
+  "license": "MIT",
+  "homepage": "https://github.com/ldclabs/cose-ts",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ldclabs/cose-ts.git"
+  },
+  "files": [
+    "dist",
+    "package.json",
+    "LICENSE",
+    "README.md"
+  ],
+  "main": "dist/index.js",
+  "typings": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "browser": "./dist/index.js",
+      "default": "./dist/index.js"
+    },
+    "./aesgcm": {
+      "types": "./dist/aesgcm.d.ts",
+      "browser": "./dist/aesgcm.js",
+      "default": "./dist/aesgcm.js"
+    },
+    "./encrypt0": {
+      "types": "./dist/encrypt0.d.ts",
+      "browser": "./dist/encrypt0.js",
+      "default": "./dist/encrypt0.js"
+    },
+    "./iana": {
+      "types": "./dist/iana.d.ts",
+      "browser": "./dist/iana.js",
+      "default": "./dist/iana.js"
+    },
+    "./key": {
+      "types": "./dist/key.d.ts",
+      "browser": "./dist/key.js",
+      "default": "./dist/key.js"
+    },
+    "./map": {
+      "types": "./dist/map.d.ts",
+      "browser": "./dist/map.js",
+      "default": "./dist/map.js"
+    },
+    "./tag": {
+      "types": "./dist/tag.d.ts",
+      "browser": "./dist/tag.js",
+      "default": "./dist/tag.js"
+    },
+    "./utils": {
+      "types": "./dist/utils.d.ts",
+      "browser": "./dist/utils.js",
+      "default": "./dist/utils.js"
+    }
+  },
+  "browser": {
+    "node:crypto": false
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "scripts": {
+    "build": "npm run clean && tsc -p tsconfig.json",
+    "clean": "rm -rf dist",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "test": "vitest src --coverage --run"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.0",
+    "@typescript-eslint/eslint-plugin": "^6.18.1",
+    "@typescript-eslint/parser": "^6.18.1",
+    "@vitest/coverage-v8": "^1.2.0",
+    "cborg": "^4.0.7",
+    "eslint": "^8.56.0",
+    "eslint-plugin-import": "^2.29.1",
+    "typescript": "^5.3.3",
+    "vitest": "^1.2.0"
+  },
+  "keywords": [
+    "cose",
+    "cbor",
+    "RFC9052",
+    "RFC9053"
+  ],
+  "dependencies": {
+    "@noble/ciphers": "=0.4.1"
+  }
+}
