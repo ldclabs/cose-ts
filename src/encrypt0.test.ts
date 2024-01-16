@@ -2,10 +2,9 @@
 // See the file LICENSE for licensing terms.
 
 import { assert, describe, it } from 'vitest'
-import { bytesToHex, hexToBytes, utf8ToBytes } from '@noble/ciphers/utils'
 import * as iana from './iana'
-import { base64ToBytes } from './utils'
-import { KVMap } from './map'
+import { bytesToHex, hexToBytes, utf8ToBytes, base64ToBytes } from './utils'
+import { Header } from './header'
 import { AesGcmKey } from './aesgcm'
 import { Encrypt0Message } from './encrypt0'
 
@@ -21,8 +20,8 @@ describe('Encrypt0Message Examples', () => {
 
     const msg = new Encrypt0Message(
       utf8ToBytes('This is the content.'),
-      new KVMap().setParam(iana.HeaderParameterAlg, iana.AlgorithmA128GCM),
-      new KVMap().setParam(
+      new Header().setParam(iana.HeaderParameterAlg, iana.AlgorithmA128GCM),
+      new Header().setParam(
         iana.HeaderParameterIV,
         hexToBytes('02D1F7E6F26C43D4868D87CE')
       )

@@ -1,29 +1,23 @@
 // (c) 2023-present, LDC Labs. All rights reserved.
 // See the file LICENSE for licensing terms.
 
-import { randomBytes } from '@noble/ciphers/webcrypto/utils'
-import { utf8ToBytes } from '@noble/ciphers/utils'
 import { gcm } from '@noble/ciphers/webcrypto/aes'
 import * as iana from './iana'
 import { RawMap, assertBytes } from './map'
 import { Key, type Encryptor } from './key'
+import { utf8ToBytes, randomBytes } from './utils'
 
+// TODO: more checks
+// AesGcmKey implements content encryption algorithm AES-GCM for COSE as defined in RFC9053.
+// https://datatracker.ietf.org/doc/html/rfc9053#name-aes-gcm.
 export class AesGcmKey extends Key implements Encryptor {
   static generate(alg: number, kid?: string): AesGcmKey {
-    const key = new AesGcmKey()
-    key.kty = iana.KeyTypeSymmetric
-    key.alg = alg
-    if (kid) {
-      key.kid = utf8ToBytes(kid)
-    }
-    key.setParam(iana.SymmetricKeyParameterK, randomBytes(getKeySize(alg)))
-    return key
+    return AesGcmKey.fromSecret(randomBytes(getKeySize(alg)), kid)
   }
 
   static fromSecret(secret: Uint8Array, kid?: string): AesGcmKey {
     const alg = getAlg(assertBytes(secret, 'secret'))
     const key = new AesGcmKey()
-    key.kty = iana.KeyTypeSymmetric
     key.alg = alg
     if (kid) {
       key.kid = utf8ToBytes(kid)
@@ -34,6 +28,8 @@ export class AesGcmKey extends Key implements Encryptor {
 
   constructor(kv?: RawMap) {
     super(kv)
+
+    this.kty = iana.KeyTypeSymmetric
   }
 
   nonceSize(): number {
@@ -41,8 +37,6 @@ export class AesGcmKey extends Key implements Encryptor {
   }
 
   getSecretKey(): Uint8Array {
-    // TODO: more checks
-    // https://datatracker.ietf.org/doc/html/rfc9053#name-aes-gcm.
     return this.getBytes(iana.SymmetricKeyParameterK, 'k')
   }
 

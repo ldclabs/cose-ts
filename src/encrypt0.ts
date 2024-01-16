@@ -1,19 +1,25 @@
 // (c) 2023-present, LDC Labs. All rights reserved.
 // See the file LICENSE for licensing terms.
 
-import { randomBytes } from '@noble/ciphers/webcrypto/utils'
-import { KVMap, RawMap } from './map'
+import { randomBytes } from './utils'
+import { Header } from './header'
+import { RawMap } from './map'
 import { Key, type Encryptor } from './key'
 import * as iana from './iana'
-import { decode, encode } from './utils'
+import { decode, encode, concatBytes } from './utils'
 import { skipTag, CwtPrefix, Encrypt0MessagePrefix } from './tag'
 
+// Encrypt0Message represents a COSE_Encrypt0 object.
+//
+// Reference https://datatracker.ietf.org/doc/html/rfc9052#name-single-recipient-encrypted.
 export class Encrypt0Message {
   payload: Uint8Array
-  protected: KVMap | null = null
-  unprotected: KVMap | null = null
+  // protected header parameters: iana.HeaderParameterAlg, iana.HeaderParameterCrit.
+  protected: Header | null = null
+  // Other header parameters.
+  unprotected: Header | null = null
 
-  private static toEnc(
+  private static encBytes(
     protectedHeader: Uint8Array,
     externalData?: Uint8Array
   ): Uint8Array {
@@ -37,8 +43,8 @@ export class Encrypt0Message {
       RawMap,
       Uint8Array
     ]
-    const protectedHeader = KVMap.fromBytes(protectedBytes)
-    const unprotectedHeader = new KVMap(unprotected)
+    const protectedHeader = Header.fromBytes(protectedBytes)
+    const unprotectedHeader = new Header(unprotected)
     if (protectedHeader.has(iana.HeaderParameterAlg)) {
       const alg = protectedHeader.getInt(iana.HeaderParameterAlg)
       if (alg !== key.alg) {
@@ -60,29 +66,29 @@ export class Encrypt0Message {
     const plaintext = await key.decrypt(
       ciphertext,
       iv,
-      Encrypt0Message.toEnc(protectedBytes, externalData)
+      Encrypt0Message.encBytes(protectedBytes, externalData)
     )
 
     return new Encrypt0Message(plaintext, protectedHeader, unprotectedHeader)
   }
 
   static withTag(coseData: Uint8Array): Uint8Array {
-    const data = new Uint8Array(
-      coseData.length + Encrypt0MessagePrefix.length - 1
+    return concatBytes(
+      Encrypt0MessagePrefix.subarray(0, Encrypt0MessagePrefix.length - 1),
+      coseData
     )
-    data.set(Encrypt0MessagePrefix)
-    data.set(coseData.subarray(1), Encrypt0MessagePrefix.length)
-    return data
   }
 
   constructor(
     payload: Uint8Array,
-    protectedHeader?: KVMap,
-    unprotected?: KVMap
+    protectedHeader?: Header,
+    unprotected?: Header
   ) {
     this.payload = payload
-    this.protected = protectedHeader ?? null
-    this.unprotected = unprotected ?? null
+    this.protected = protectedHeader
+      ? new Header(protectedHeader.toRaw())
+      : null
+    this.unprotected = unprotected ? new Header(unprotected.toRaw()) : null
   }
 
   async toBytes(
@@ -90,7 +96,7 @@ export class Encrypt0Message {
     externalData?: Uint8Array
   ): Promise<Uint8Array> {
     if (this.protected == null) {
-      this.protected = new KVMap()
+      this.protected = new Header()
       if (key.has(iana.KeyParameterAlg)) {
         this.protected.setParam(iana.HeaderParameterAlg, key.alg)
       }
@@ -104,7 +110,7 @@ export class Encrypt0Message {
     }
 
     if (this.unprotected == null) {
-      this.unprotected = new KVMap()
+      this.unprotected = new Header()
       if (key.has(iana.KeyParameterKid)) {
         this.unprotected.setParam(iana.HeaderParameterKid, key.kid)
       }
@@ -126,7 +132,7 @@ export class Encrypt0Message {
     const ciphertext = await key.encrypt(
       this.payload,
       iv,
-      Encrypt0Message.toEnc(protectedBytes, externalData)
+      Encrypt0Message.encBytes(protectedBytes, externalData)
     )
 
     return encode([protectedBytes, this.unprotected.toRaw(), ciphertext])

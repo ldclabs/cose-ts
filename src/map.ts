@@ -74,6 +74,10 @@ export class KVMap {
     return this.raw.has(key)
   }
 
+  delete(key: Label): boolean {
+    return this.raw.delete(key)
+  }
+
   getInt(key: Label, name?: string): number {
     return assertInt(this.raw.get(key), name ?? String(key))
   }

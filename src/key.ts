@@ -20,9 +20,20 @@ export interface Encryptor {
 }
 
 export interface MACer {
-  macer(aad?: Uint8Array): (message: Uint8Array) => Promise<Uint8Array>
+  mac(message: Uint8Array, aad?: Uint8Array): Uint8Array
 }
 
+export interface Signer {
+  sign(message: Uint8Array): Uint8Array
+}
+
+export interface Verifier {
+  verify(message: Uint8Array, signature: Uint8Array): boolean
+}
+
+// Key implements algorithms and key objects for COSE as defined in RFC9052 and RFC9053.
+// https://datatracker.ietf.org/doc/html/rfc9052#name-key-objects.
+// https://datatracker.ietf.org/doc/html/rfc9053.
 export class Key extends KVMap {
   static fromBytes(data: Uint8Array): Key {
     return new Key(decode(data))

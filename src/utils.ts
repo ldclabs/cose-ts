@@ -3,6 +3,15 @@
 
 import { decode as _decode, encode as _encode } from 'cborg'
 
+export {
+  bytesToHex,
+  hexToBytes,
+  utf8ToBytes,
+  randomBytes,
+  toBytes,
+  concatBytes,
+} from '@noble/hashes/utils'
+
 // re-export with the right types
 export function decode<T>(data: Uint8Array): T {
   return _decode(data, {
@@ -23,5 +32,8 @@ export function bytesToBase64Url(bytes: Uint8Array) {
 }
 
 export function base64ToBytes(str: string) {
-  return Uint8Array.from(atob(str), (m) => m.codePointAt(0)!)
+  return Uint8Array.from(
+    atob(str.replaceAll('-', '+').replaceAll('_', '/')),
+    (m) => m.codePointAt(0)!
+  )
 }
