@@ -4,7 +4,7 @@
 [![NPM version](http://img.shields.io/npm/v/@ldclabs/cose-ts.svg)](https://www.npmjs.com/package/@ldclabs/cose-ts)
 [![License](http://img.shields.io/badge/license-mit-blue.svg?style=flat-square)](https://raw.githubusercontent.com/ldclabs/cose-ts/main/LICENSE)
 
-*A typeScript library for the [CBOR Object Signing and Encryption (COSE)][cose-spec] and [CBOR Web Token (CWT)][cwt-spec].*
+*A TypeScript library for the [CBOR Object Signing and Encryption (COSE)][cose-spec] and [CBOR Web Token (CWT)][cwt-spec].*
 
 + Golang version: [https://github.com/ldclabs/cose](https://github.com/ldclabs/cose)
 + Rust version: [https://github.com/google/coset](https://github.com/google/coset)
