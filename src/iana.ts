@@ -534,3 +534,49 @@ export const CBORTagCOSEEncrypt = 96
 export const CBORTagCOSEMac = 97
 // COSE Signed Data Object
 export const CBORTagCOSESign = 98
+
+// CBOR Web Token (CWT) Claims
+//
+// From IANA registry https://www.iana.org/assignments/cwt/cwt.xhtml
+// as of 2024-01-17.
+export const CWTClaimReserved = 0
+// CWT Issuer
+//
+// Associated value of type text string
+export const CWTClaimIss = 1
+// CWT Subject
+//
+// Associated value of type text string
+export const CWTClaimSub = 2
+// CWT Audience
+//
+// Associated value of type text string
+export const CWTClaimAud = 3
+// CWT Expiration Time
+//
+// Associated value of type text string
+export const CWTClaimExp = 4
+// CWT Not Before
+//
+// Associated value of type integer or floating-point number
+export const CWTClaimNbf = 5
+// CWT Issued At
+//
+// Associated value of type integer or floating-point number
+export const CWTClaimIat = 6
+// CWT CWT ID
+//
+// Associated value of type byte string
+export const CWTClaimCti = 7
+// CWT Confirmation
+//
+// Associated value of type map
+export const CWTClaimCnf = 8
+// CWT The scope of an access token
+//
+// Associated value of type byte string or text string
+export const CWTClaimScope = 9
+// CWT Nonce
+//
+// Associated value of type bstr or array
+export const CWTClaimNonce = 10

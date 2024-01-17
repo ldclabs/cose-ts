@@ -2,7 +2,7 @@
 // See the file LICENSE for licensing terms.
 
 import { KVMap, RawMap } from './map'
-import { decode } from './utils'
+import { decodeCBOR } from './utils'
 
 // Header represents a COSE Generic_Headers structure.
 export class Header extends KVMap {
@@ -10,7 +10,7 @@ export class Header extends KVMap {
     if (data.length === 0) {
       return new Header()
     }
-    return new Header(decode(data))
+    return new Header(decodeCBOR(data))
   }
 
   constructor(kv: RawMap = new Map()) {

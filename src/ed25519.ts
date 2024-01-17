@@ -69,14 +69,14 @@ export class Ed25519Key extends Key implements Signer, Verifier {
   }
 
   public(): Ed25519Key {
-    const key = new Ed25519Key(this.toRaw())
+    const key = new Ed25519Key(this.clone())
     if (key.has(iana.OKPKeyParameterD)) {
       key.setParam(iana.OKPKeyParameterX, key.getPublicKey())
       key.delete(iana.OKPKeyParameterD)
     }
 
-    if (this.has(iana.KeyParameterKeyOps)) {
-      this.ops = [iana.KeyOperationVerify]
+    if (key.has(iana.KeyParameterKeyOps)) {
+      key.ops = [iana.KeyOperationVerify]
     }
 
     return key

@@ -5,8 +5,8 @@ import { Header } from './header'
 import { RawMap } from './map'
 import { Key, type Verifier, Signer } from './key'
 import * as iana from './iana'
-import { decode, encode, concatBytes } from './utils'
-import { skipTag, CwtPrefix, Sign1MessagePrefix } from './tag'
+import { decodeCBOR, encodeCBOR } from './utils'
+import { skipTag, withTag, CwtPrefix, Sign1MessagePrefix } from './tag'
 
 // Sign1Message represents a COSE_Sign1 object.
 //
@@ -21,7 +21,7 @@ export class Sign1Message {
     protectedHeader: Uint8Array,
     externalData?: Uint8Array
   ): Uint8Array {
-    return encode([
+    return encodeCBOR([
       'Signature1',
       protectedHeader,
       externalData ?? new Uint8Array(),
@@ -34,15 +34,11 @@ export class Sign1Message {
     coseData: Uint8Array,
     externalData?: Uint8Array
   ): Sign1Message {
-    let data = skipTag(coseData, CwtPrefix)
-    data = skipTag(data, Sign1MessagePrefix)
+    const data = skipTag(Sign1MessagePrefix, skipTag(CwtPrefix, coseData))
 
-    const [protectedBytes, unprotected, payload, signature] = decode(data) as [
-      Uint8Array,
-      RawMap,
-      Uint8Array,
-      Uint8Array
-    ]
+    const [protectedBytes, unprotected, payload, signature] = decodeCBOR(
+      data
+    ) as [Uint8Array, RawMap, Uint8Array, Uint8Array]
     const protectedHeader = Header.fromBytes(protectedBytes)
     const unprotectedHeader = new Header(unprotected)
     if (protectedHeader.has(iana.HeaderParameterAlg)) {
@@ -67,10 +63,7 @@ export class Sign1Message {
   }
 
   static withTag(coseData: Uint8Array): Uint8Array {
-    return concatBytes(
-      Sign1MessagePrefix.subarray(0, Sign1MessagePrefix.length - 1),
-      coseData
-    )
+    return withTag(Sign1MessagePrefix, coseData)
   }
 
   constructor(
@@ -112,6 +105,11 @@ export class Sign1Message {
       Sign1Message.signBytes(this.payload, protectedBytes, externalData)
     )
 
-    return encode([protectedBytes, this.unprotected.toRaw(), this.payload, sig])
+    return encodeCBOR([
+      protectedBytes,
+      this.unprotected.toRaw(),
+      this.payload,
+      sig,
+    ])
   }
 }

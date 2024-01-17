@@ -13,15 +13,37 @@ describe('AesGcmKey Examples', () => {
     )
     assert.equal(key.alg, iana.AlgorithmA128GCM)
 
-    const data = await key.encrypt(
+    const ciphertext = await key.encrypt(
       utf8ToBytes('This is the content.'),
       hexToBytes('02D1F7E6F26C43D4868D87CE'),
       hexToBytes('8367456E637279707443A1010140')
     )
     assert.equal(
-      bytesToHex(data).toUpperCase(),
+      bytesToHex(ciphertext).toUpperCase(),
       '60973A94BB2898009EE52ECFD9AB1DD25867374B3581F2C80039826350B97AE2300E42FC'
     )
+
+    const plaintext = await key.decrypt(
+      ciphertext,
+      hexToBytes('02D1F7E6F26C43D4868D87CE'),
+      hexToBytes('8367456E637279707443A1010140')
+    )
+    assert.equal(
+      bytesToHex(plaintext),
+      bytesToHex(utf8ToBytes('This is the content.'))
+    )
+
+    let err = null
+    try {
+      await key.decrypt(
+        ciphertext,
+        hexToBytes('02D1F7E6F26C43D4868D87CE'),
+        hexToBytes('8367456E637279707443A1010141')
+      )
+    } catch (_err) {
+      err = _err
+    }
+    assert.exists(err)
   })
 
   it('AlgorithmA192GCM', async () => {
@@ -30,15 +52,37 @@ describe('AesGcmKey Examples', () => {
     )
     assert.equal(key.alg, iana.AlgorithmA192GCM)
 
-    const data = await key.encrypt(
+    const ciphertext = await key.encrypt(
       utf8ToBytes('This is the content.'),
       hexToBytes('02D1F7E6F26C43D4868D87CE'),
       hexToBytes('8367456E637279707443A1010240')
     )
     assert.equal(
-      bytesToHex(data).toUpperCase(),
+      bytesToHex(ciphertext).toUpperCase(),
       '134D3B9223A00C1552C77585C157F467F295919D12124F19F521484C0725410947B4D1CA'
     )
+
+    const plaintext = await key.decrypt(
+      ciphertext,
+      hexToBytes('02D1F7E6F26C43D4868D87CE'),
+      hexToBytes('8367456E637279707443A1010240')
+    )
+    assert.equal(
+      bytesToHex(plaintext),
+      bytesToHex(utf8ToBytes('This is the content.'))
+    )
+
+    let err = null
+    try {
+      await key.decrypt(
+        ciphertext,
+        hexToBytes('02D1F7E6F26C43D4868D87CE'),
+        hexToBytes('8367456E637279707443A1010241')
+      )
+    } catch (_err) {
+      err = _err
+    }
+    assert.exists(err)
   })
 
   it('AlgorithmA256GCM', async () => {
@@ -49,14 +93,36 @@ describe('AesGcmKey Examples', () => {
     )
     assert.equal(key.alg, iana.AlgorithmA256GCM)
 
-    const data = await key.encrypt(
+    const ciphertext = await key.encrypt(
       utf8ToBytes('This is the content.'),
       hexToBytes('02D1F7E6F26C43D4868D87CE'),
       hexToBytes('8367456E637279707443A1010340')
     )
     assert.equal(
-      bytesToHex(data).toUpperCase(),
+      bytesToHex(ciphertext).toUpperCase(),
       '9D64A5A59A3B04867DCCF6B8EF82F7D1A3B25EF862B6EDDB29DF2EF16582172E5B5FC757'
     )
+
+    const plaintext = await key.decrypt(
+      ciphertext,
+      hexToBytes('02D1F7E6F26C43D4868D87CE'),
+      hexToBytes('8367456E637279707443A1010340')
+    )
+    assert.equal(
+      bytesToHex(plaintext),
+      bytesToHex(utf8ToBytes('This is the content.'))
+    )
+
+    let err = null
+    try {
+      await key.decrypt(
+        ciphertext,
+        hexToBytes('02D1F7E6F26C43D4868D87CE'),
+        hexToBytes('8367456E637279707443A1010341')
+      )
+    } catch (_err) {
+      err = _err
+    }
+    assert.exists(err)
   })
 })

@@ -6,8 +6,8 @@ import { Header } from './header'
 import { RawMap } from './map'
 import { Key, type Encryptor } from './key'
 import * as iana from './iana'
-import { decode, encode, concatBytes } from './utils'
-import { skipTag, CwtPrefix, Encrypt0MessagePrefix } from './tag'
+import { decodeCBOR, encodeCBOR } from './utils'
+import { skipTag, withTag, CwtPrefix, Encrypt0MessagePrefix } from './tag'
 
 // Encrypt0Message represents a COSE_Encrypt0 object.
 //
@@ -23,7 +23,7 @@ export class Encrypt0Message {
     protectedHeader: Uint8Array,
     externalData?: Uint8Array
   ): Uint8Array {
-    return encode([
+    return encodeCBOR([
       'Encrypt0',
       protectedHeader,
       externalData ?? new Uint8Array(),
@@ -35,10 +35,9 @@ export class Encrypt0Message {
     coseData: Uint8Array,
     externalData?: Uint8Array
   ): Promise<Encrypt0Message> {
-    let data = skipTag(coseData, CwtPrefix)
-    data = skipTag(data, Encrypt0MessagePrefix)
+    const data = skipTag(Encrypt0MessagePrefix, skipTag(CwtPrefix, coseData))
 
-    const [protectedBytes, unprotected, ciphertext] = decode(data) as [
+    const [protectedBytes, unprotected, ciphertext] = decodeCBOR(data) as [
       Uint8Array,
       RawMap,
       Uint8Array
@@ -73,10 +72,7 @@ export class Encrypt0Message {
   }
 
   static withTag(coseData: Uint8Array): Uint8Array {
-    return concatBytes(
-      Encrypt0MessagePrefix.subarray(0, Encrypt0MessagePrefix.length - 1),
-      coseData
-    )
+    return withTag(Encrypt0MessagePrefix, coseData)
   }
 
   constructor(
@@ -135,6 +131,6 @@ export class Encrypt0Message {
       Encrypt0Message.encBytes(protectedBytes, externalData)
     )
 
-    return encode([protectedBytes, this.unprotected.toRaw(), ciphertext])
+    return encodeCBOR([protectedBytes, this.unprotected.toRaw(), ciphertext])
   }
 }

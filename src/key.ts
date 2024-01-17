@@ -3,7 +3,7 @@
 
 import { KVMap, RawMap, assertIntOrText, assertBytes } from './map'
 import * as iana from './iana'
-import { decode } from './utils'
+import { decodeCBOR } from './utils'
 
 export interface Encryptor {
   nonceSize(): number
@@ -36,7 +36,7 @@ export interface Verifier {
 // https://datatracker.ietf.org/doc/html/rfc9053.
 export class Key extends KVMap {
   static fromBytes(data: Uint8Array): Key {
-    return new Key(decode(data))
+    return new Key(decodeCBOR(data))
   }
 
   constructor(kv: RawMap = new Map()) {

@@ -1,11 +1,11 @@
 // (c) 2023-present, LDC Labs. All rights reserved.
 // See the file LICENSE for licensing terms.
 
-import { encode, decode } from './utils'
+import { encodeCBOR, decodeCBOR } from './utils'
 
 export type Label = number | string
 
-export type Value = number | string | Uint8Array | boolean | Value[]
+export type Value = number | string | Uint8Array | boolean | Value[] | RawMap
 
 export type RawMap = Map<Label, Value>
 
@@ -16,7 +16,7 @@ export function assertText(value: unknown, name: string): string {
     return value
   }
 
-  throw new TypeError(`${name} must be a string`)
+  throw new TypeError(`${name} must be a string, but got ${String(value)}`)
 }
 
 export function assertInt(value: unknown, name: string): number {
@@ -24,7 +24,7 @@ export function assertInt(value: unknown, name: string): number {
     return value as number
   }
 
-  throw new TypeError(`${name} must be a integer`)
+  throw new TypeError(`${name} must be a integer, but got ${String(value)}`)
 }
 
 export function assertIntOrText(value: unknown, name: string): number | string {
@@ -36,7 +36,9 @@ export function assertIntOrText(value: unknown, name: string): number | string {
     return value as number
   }
 
-  throw new TypeError(`${name} must be a integer or string`)
+  throw new TypeError(
+    `${name} must be a integer or string, but got ${String(value)}`
+  )
 }
 
 export function assertBytes(value: unknown, name: string): Uint8Array {
@@ -44,7 +46,7 @@ export function assertBytes(value: unknown, name: string): Uint8Array {
     return value
   }
 
-  throw new TypeError(`${name} must be a Uint8Array`)
+  throw new TypeError(`${name} must be a Uint8Array, but got ${String(value)}`)
 }
 
 export function assertBool(value: unknown, name: string): boolean {
@@ -52,14 +54,22 @@ export function assertBool(value: unknown, name: string): boolean {
     return value
   }
 
-  throw new TypeError(`${name} must be a Boolean`)
+  throw new TypeError(`${name} must be a Boolean, but got ${String(value)}`)
+}
+
+export function assertMap(value: unknown, name: string): RawMap {
+  if (value instanceof Map) {
+    return value as RawMap
+  }
+
+  throw new TypeError(`${name} must be a Map, but got ${String(value)}`)
 }
 
 export class KVMap {
-  private raw: RawMap
+  private _raw: RawMap
 
   static fromBytes(data: Uint8Array): KVMap {
-    return new KVMap(decode(data))
+    return new KVMap(decodeCBOR(data))
   }
 
   constructor(kv: RawMap = new Map()) {
@@ -67,43 +77,43 @@ export class KVMap {
       throw new TypeError('key/value must be a Map')
     }
 
-    this.raw = kv
+    this._raw = kv
   }
 
   has(key: Label): boolean {
-    return this.raw.has(key)
+    return this._raw.has(key)
   }
 
   delete(key: Label): boolean {
-    return this.raw.delete(key)
+    return this._raw.delete(key)
   }
 
   getInt(key: Label, name?: string): number {
-    return assertInt(this.raw.get(key), name ?? String(key))
+    return assertInt(this._raw.get(key), name ?? String(key))
   }
 
   getText(key: Label, name?: string): string {
-    return assertText(this.raw.get(key), name ?? String(key))
+    return assertText(this._raw.get(key), name ?? String(key))
   }
 
   getBytes(key: Label, name?: string): Uint8Array {
-    return assertBytes(this.raw.get(key), name ?? String(key))
+    return assertBytes(this._raw.get(key), name ?? String(key))
   }
 
   getBool(key: Label, name?: string): boolean {
-    return assertBool(this.raw.get(key), name ?? String(key))
+    return assertBool(this._raw.get(key), name ?? String(key))
   }
 
   getType<T>(key: Label, assertFn: AssertFn<T>, name?: string): T {
-    return assertFn(this.raw.get(key), name ?? String(key))
+    return assertFn(this._raw.get(key), name ?? String(key))
   }
 
   getArray<T>(key: Label, assertFn: AssertFn<T>, name?: string): T[] {
     const na = name ? name : String(key)
-    const arr = this.raw.get(key) as T[]
+    const arr = this._raw.get(key) as T[]
 
     if (!Array.isArray(arr)) {
-      throw new TypeError(`${na} must be an array`)
+      throw new TypeError(`${na} must be an array, but got ${String(arr)}`)
     }
 
     for (const item of arr) {
@@ -114,19 +124,23 @@ export class KVMap {
   }
 
   getParam<T>(key: Label): T | undefined {
-    return this.raw.get(key) as T
+    return this._raw.get(key) as T
   }
 
   setParam(key: Label, value: Value): this {
-    this.raw.set(key, value)
+    this._raw.set(key, value)
     return this
   }
 
+  clone(): RawMap {
+    return new Map(this._raw)
+  }
+
   toRaw(): RawMap {
-    return this.raw
+    return this._raw
   }
 
   toBytes(): Uint8Array {
-    return encode(this.raw)
+    return encodeCBOR(this._raw)
   }
 }

@@ -5,8 +5,8 @@ import { Header } from './header'
 import { RawMap } from './map'
 import { Key, type MACer } from './key'
 import * as iana from './iana'
-import { decode, encode, concatBytes, compareBytes } from './utils'
-import { skipTag, CwtPrefix, Mac0MessagePrefix } from './tag'
+import { decodeCBOR, encodeCBOR, compareBytes } from './utils'
+import { skipTag, withTag, CwtPrefix, Mac0MessagePrefix } from './tag'
 
 // Mac0Message represents a COSE_Mac0 object.
 //
@@ -23,7 +23,7 @@ export class Mac0Message {
     protectedHeader: Uint8Array,
     externalData?: Uint8Array
   ): Uint8Array {
-    return encode([
+    return encodeCBOR([
       'MAC0',
       protectedHeader,
       externalData ?? new Uint8Array(),
@@ -36,10 +36,9 @@ export class Mac0Message {
     coseData: Uint8Array,
     externalData?: Uint8Array
   ): Mac0Message {
-    let data = skipTag(coseData, CwtPrefix)
-    data = skipTag(data, Mac0MessagePrefix)
+    const data = skipTag(Mac0MessagePrefix, skipTag(CwtPrefix, coseData))
 
-    const [protectedBytes, unprotected, payload, tag] = decode(data) as [
+    const [protectedBytes, unprotected, payload, tag] = decodeCBOR(data) as [
       Uint8Array,
       RawMap,
       Uint8Array,
@@ -67,10 +66,7 @@ export class Mac0Message {
   }
 
   static withTag(coseData: Uint8Array): Uint8Array {
-    return concatBytes(
-      Mac0MessagePrefix.subarray(0, Mac0MessagePrefix.length - 1),
-      coseData
-    )
+    return withTag(Mac0MessagePrefix, coseData)
   }
 
   constructor(
@@ -112,6 +108,11 @@ export class Mac0Message {
       Mac0Message.macBytes(this.payload, protectedBytes, externalData)
     )
 
-    return encode([protectedBytes, this.unprotected.toRaw(), this.payload, tag])
+    return encodeCBOR([
+      protectedBytes,
+      this.unprotected.toRaw(),
+      this.payload,
+      tag,
+    ])
   }
 }

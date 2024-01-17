@@ -105,7 +105,7 @@ export class ECDSAKey extends Key implements Signer, Verifier {
   }
 
   public(): ECDSAKey {
-    const key = new ECDSAKey(this.toRaw())
+    const key = new ECDSAKey(this.clone())
     if (key.has(iana.EC2KeyParameterD)) {
       const curve = getCurve(this.alg)
       const pk = key.getPublicKey()
@@ -133,8 +133,8 @@ export class ECDSAKey extends Key implements Signer, Verifier {
       key.delete(iana.EC2KeyParameterD)
     }
 
-    if (this.has(iana.KeyParameterKeyOps)) {
-      this.ops = [iana.KeyOperationVerify]
+    if (key.has(iana.KeyParameterKeyOps)) {
+      key.ops = [iana.KeyOperationVerify]
     }
 
     return key

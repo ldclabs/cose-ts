@@ -13,14 +13,14 @@ export {
 } from '@noble/hashes/utils'
 
 // re-export with the right types
-export function decode<T>(data: Uint8Array): T {
+export function decodeCBOR<T>(data: Uint8Array): T {
   return _decode(data, {
     useMaps: true,
     rejectDuplicateMapKeys: true,
   }) as T
 }
 
-export function encode(data: unknown): Uint8Array {
+export function encodeCBOR(data: unknown): Uint8Array {
   return _encode(data, {})
 }
 
