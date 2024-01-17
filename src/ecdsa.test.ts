@@ -30,6 +30,9 @@ describe('ECDSAKey Examples', () => {
 
       const sig2 = key2.sign(utf8ToBytes('This is the content.'))
       assert.equal(bytesToHex(sig2), bytesToHex(sig))
+
+      const pk2 = ECDSAKey.fromPublic(pk.getPublicKey())
+      assert.equal(pk2.verify(utf8ToBytes('This is the content.'), sig2), true)
     }
   })
 })

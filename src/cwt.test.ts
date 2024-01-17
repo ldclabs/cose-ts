@@ -2,8 +2,7 @@
 // See the file LICENSE for licensing terms.
 
 import { assert, describe, it } from 'vitest'
-import { utf8ToBytes, bytesToHex, randomBytes, compareBytes } from './utils'
-import * as iana from './iana'
+import { utf8ToBytes, randomBytes, compareBytes } from './utils'
 import { Validator, Claims, withCWTTag } from './cwt'
 import { Ed25519Key } from './ed25519'
 import { Sign1Message } from './sign1'

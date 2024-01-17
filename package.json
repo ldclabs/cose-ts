@@ -1,7 +1,7 @@
 {
   "name": "@ldclabs/cose-ts",
   "type": "module",
-  "version": "0.3.0",
+  "version": "1.0.0",
   "author": "0xZensh <txr1883@gmail.com>",
   "description": "Implemented Keys, Algorithms (RFC9053), COSE (RFC9052) and CWT (RFC8392) in TypeScript.",
   "license": "MIT",
@@ -13,6 +13,7 @@
   "files": [
     "dist",
     "package.json",
+    "pnpm-lock.yaml",
     "LICENSE",
     "README.md"
   ],
@@ -29,10 +30,45 @@
       "browser": "./dist/aesgcm.js",
       "default": "./dist/aesgcm.js"
     },
+    "./chacha20poly1305": {
+      "types": "./dist/chacha20poly1305.d.ts",
+      "browser": "./dist/chacha20poly1305.js",
+      "default": "./dist/chacha20poly1305.js"
+    },
+    "./cwt": {
+      "types": "./dist/cwt.d.ts",
+      "browser": "./dist/cwt.js",
+      "default": "./dist/cwt.js"
+    },
+    "./ecdsa": {
+      "types": "./dist/ecdsa.d.ts",
+      "browser": "./dist/ecdsa.js",
+      "default": "./dist/ecdsa.js"
+    },
+    "./ed25519": {
+      "types": "./dist/ed25519.d.ts",
+      "browser": "./dist/ed25519.js",
+      "default": "./dist/ed25519.js"
+    },
     "./encrypt0": {
       "types": "./dist/encrypt0.d.ts",
       "browser": "./dist/encrypt0.js",
       "default": "./dist/encrypt0.js"
+    },
+    "./hash": {
+      "types": "./dist/hash.d.ts",
+      "browser": "./dist/hash.js",
+      "default": "./dist/hash.js"
+    },
+    "./header": {
+      "types": "./dist/header.d.ts",
+      "browser": "./dist/header.js",
+      "default": "./dist/header.js"
+    },
+    "./hmac": {
+      "types": "./dist/hmac.d.ts",
+      "browser": "./dist/hmac.js",
+      "default": "./dist/hmac.js"
     },
     "./iana": {
       "types": "./dist/iana.d.ts",
@@ -44,10 +80,20 @@
       "browser": "./dist/key.js",
       "default": "./dist/key.js"
     },
+    "./mac0": {
+      "types": "./dist/mac0.d.ts",
+      "browser": "./dist/mac0.js",
+      "default": "./dist/mac0.js"
+    },
     "./map": {
       "types": "./dist/map.d.ts",
       "browser": "./dist/map.js",
       "default": "./dist/map.js"
+    },
+    "./sign1": {
+      "types": "./dist/sign1.d.ts",
+      "browser": "./dist/sign1.js",
+      "default": "./dist/sign1.js"
     },
     "./tag": {
       "types": "./dist/tag.d.ts",
@@ -86,6 +132,7 @@
   "keywords": [
     "cose",
     "cbor",
+    "RFC8392",
     "RFC9052",
     "RFC9053"
   ],

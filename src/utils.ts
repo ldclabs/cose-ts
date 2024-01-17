@@ -1,7 +1,7 @@
 // (c) 2023-present, LDC Labs. All rights reserved.
 // See the file LICENSE for licensing terms.
 
-import { decode as _decode, encode as _encode } from 'cborg'
+import { decode, encode } from 'cborg'
 
 export {
   bytesToHex,
@@ -12,16 +12,15 @@ export {
   concatBytes,
 } from '@noble/hashes/utils'
 
-// re-export with the right types
 export function decodeCBOR<T>(data: Uint8Array): T {
-  return _decode(data, {
+  return decode(data, {
     useMaps: true,
     rejectDuplicateMapKeys: true,
   }) as T
 }
 
 export function encodeCBOR(data: unknown): Uint8Array {
-  return _encode(data, {})
+  return encode(data, {})
 }
 
 export function bytesToBase64Url(bytes: Uint8Array): string {

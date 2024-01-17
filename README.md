@@ -31,13 +31,13 @@ COSE is a standard for signing and encrypting data in the [CBOR][cbor] data form
 | [encrypt0](https://github.com/ldclabs/cose-ts/blob/main/src/encrypt0.ts)                 | @ldclabs/cose-ts/encrypt0         | exports: class `Encrypt0Message`                                                                                                                                                                                                                                                           |
 | [sign1](https://github.com/ldclabs/cose-ts/blob/main/src/sign1.ts)                       | @ldclabs/cose-ts/sign1            | exports: class `Sign1Message`                                                                                                                                                                                                                                                              |
 | [mac0](https://github.com/ldclabs/cose-ts/blob/main/src/mac0.ts)                         | @ldclabs/cose-ts/mac0             | exports: class `Mac0Message`                                                                                                                                                                                                                                                               |
-| [iana](https://github.com/ldclabs/cose-ts/blob/main/src/cwt.ts)                          | @ldclabs/cose-ts/iana             | [IANA: COSE][iana-cose] + [IANA: CWT][iana-cwt] + [IANA: CBOR Tags][iana-cbor-tags]                                                                                                                                                                                                        |
-| [ed25519](https://github.com/ldclabs/cose-ts/blob/main/src/cwt.ts)                       | @ldclabs/cose-ts/ed25519          | exports: class `Ed25519Key`                                                                                                                                                                                                                                                                |
+| [iana](https://github.com/ldclabs/cose-ts/blob/main/src/iana.ts)                         | @ldclabs/cose-ts/iana             | [IANA: COSE][iana-cose] + [IANA: CWT][iana-cwt] + [IANA: CBOR Tags][iana-cbor-tags]                                                                                                                                                                                                        |
+| [ed25519](https://github.com/ldclabs/cose-ts/blob/main/src/ed25519.ts)                   | @ldclabs/cose-ts/ed25519          | exports: class `Ed25519Key`                                                                                                                                                                                                                                                                |
 | [ecdsa](https://github.com/ldclabs/cose-ts/blob/main/src/ecdsa.ts)                       | @ldclabs/cose-ts/ecdsa            | exports: class `ECDSAKey`, function `getCrv`, function `getCurve`                                                                                                                                                                                                                          |
 | [hmac](https://github.com/ldclabs/cose-ts/blob/main/src/hmac.ts)                         | @ldclabs/cose-ts/hmac             | exports: class `HMACKey`                                                                                                                                                                                                                                                                   |
 | [aesgcm](https://github.com/ldclabs/cose-ts/blob/main/src/aesgcm.ts)                     | @ldclabs/cose-ts/aesgcm           | exports: class `AesGcmKey`                                                                                                                                                                                                                                                                 |  |
 | [chacha20poly1305](https://github.com/ldclabs/cose-ts/blob/main/src/chacha20poly1305.ts) | @ldclabs/cose-ts/chacha20poly1305 | exports: class `ChaCha20Poly1305Key`                                                                                                                                                                                                                                                       |
-| [key](https://github.com/ldclabs/cose-ts/blob/main/src/cwt.ts)                           | @ldclabs/cose-ts/key              | exports: class `Key`, interface `Encryptor`, interface `MACer`, interface `Signer`, interface `Verifier`                                                                                                                                                                                   |
+| [key](https://github.com/ldclabs/cose-ts/blob/main/src/key.ts)                           | @ldclabs/cose-ts/key              | exports: class `Key`, interface `Encryptor`, interface `MACer`, interface `Signer`, interface `Verifier`                                                                                                                                                                                   |
 | [hash](https://github.com/ldclabs/cose-ts/blob/main/src/hash.ts)                         | @ldclabs/cose-ts/hash             | exports: `hmac`, `sha256`, `sha384`, `sha512`, `sha3_256`, `sha3_384`, `sha3_512`, function `getHash`                                                                                                                                                                                      |
 | [header](https://github.com/ldclabs/cose-ts/blob/main/src/header.ts)                     | @ldclabs/cose-ts/header           | exports: class `Header`                                                                                                                                                                                                                                                                    |
 | [map](https://github.com/ldclabs/cose-ts/blob/main/src/map.ts)                           | @ldclabs/cose-ts/map              | exports: class `KVMap`, type `RawMap`, type `AssertFn<T>`, `assertText`, `assertInt`, `assertIntOrText`, `assertBytes`, `assertBool`, `assertMap`                                                                                                                                          |
@@ -45,6 +45,48 @@ COSE is a standard for signing and encrypting data in the [CBOR][cbor] data form
 | [utils](https://github.com/ldclabs/cose-ts/blob/main/src/utils.ts)                       | @ldclabs/cose-ts/utils            | exports: `bytesToHex`, `hexToBytes`,                                                                                                               `utf8ToBytes`, `randomBytes`, `toBytes`, `concatBytes`, `bytesToBase64Url`, `base64ToBytes`, `compareBytes`, `decodeCBOR`, `encodeCBOR` |
 
 ## Examples
+
+### CWT in Sign1Message with Ed25519 Key
+
+```typescript
+import { utf8ToBytes, randomBytes, compareBytes } from '@ldclabs/cose-ts/utils'
+import { Validator, Claims, withCWTTag } from '@ldclabs/cose-ts/cwt'
+import { Ed25519Key } from '@ldclabs/cose-ts/ed25519'
+import { Sign1Message } from '@ldclabs/cose-ts/sign1'
+
+// get key
+const privKey = Ed25519Key.generate()
+// const privKey = Ed25519Key.fromSecret(32_bytes_secret)
+const pubKey = privKey.public()
+// const pubKey = Ed25519Key.fromPublic(32_bytes_public)
+
+// signing
+const claims = new Claims()
+claims.iss = 'ldclabs'
+claims.aud = 'cose-ts'
+claims.sub = 'tester'
+claims.exp = Math.floor(Date.now() / 1000) + 3600
+claims.cti = randomBytes(16)
+
+const cwtMsg = new Sign1Message(claims.toBytes())
+const cwtData = cwtMsg.toBytes(privKey, utf8ToBytes('@ldclabs/cose-ts'))
+// const cwtDataWithTag = withCWTTag(cwtData)
+
+// verifying
+const cwtMsg2 = Sign1Message.fromBytes(
+  pubKey,
+  cwtData, // or cwtDataWithTag
+  utf8ToBytes('@ldclabs/cose-ts')
+)
+const claims2 = Claims.fromBytes(cwtMsg2.payload)
+const validator = new Validator({ expectedIssuer: 'ldclabs' })
+validator.validate(claims2)
+assert.equal(claims2.iss, claims.iss)
+assert.equal(claims2.aud, claims.aud)
+assert.equal(claims2.sub, claims.sub)
+assert.equal(claims2.exp, claims.exp)
+assert.equal(compareBytes(claims2.cti, claims.cti), 0)
+```
 
 ## Security Reviews
 

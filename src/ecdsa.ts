@@ -21,13 +21,7 @@ export class ECDSAKey extends Key implements Signer, Verifier {
 
   static fromSecret(secret: Uint8Array, kid?: string): ECDSAKey {
     assertBytes(secret, 'secret')
-    let alg = iana.AlgorithmES256
-    if (secret.length === 48) {
-      alg = iana.AlgorithmES384
-    } else if (secret.length >= 65) {
-      alg = iana.AlgorithmES512
-    }
-
+    const alg = getAlg(secret.length)
     const key = new ECDSAKey()
     key.alg = alg
 
@@ -47,15 +41,43 @@ export class ECDSAKey extends Key implements Signer, Verifier {
 
   static fromPublic(pubkey: Uint8Array, kid?: string): ECDSAKey {
     assertBytes(pubkey, 'public key')
-    if (pubkey.length !== 32) {
+    if (pubkey.length < 33) {
       throw new Error(
-        `cose-ts: ECDSAKey.fromPublic: public key size mismatch, expected 32, got ${pubkey.length}`
+        `cose-ts: ECDSAKey.fromPublic: public key size mismatch, expected at least 33, got ${pubkey.length}`
       )
     }
 
+    const alg =
+      pubkey[0] == 0x04
+        ? getAlg((pubkey.length - 1) / 2)
+        : getAlg(pubkey.length - 1)
     const key = new ECDSAKey()
+    key.alg = alg
+    const curve = getCurve(alg)
+    curve.ProjectivePoint.fromHex(pubkey) // validate public key
 
-    key.setParam(iana.EC2KeyParameterX, pubkey)
+    switch (pubkey[0]) {
+      case 0x02:
+        key.setParam(iana.EC2KeyParameterY, false)
+        key.setParam(iana.EC2KeyParameterX, pubkey.subarray(1))
+        break
+      case 0x03:
+        key.setParam(iana.EC2KeyParameterY, true)
+        key.setParam(iana.EC2KeyParameterX, pubkey.subarray(1))
+        break
+      case 0x04:
+        key.setParam(
+          iana.EC2KeyParameterX,
+          pubkey.subarray(1, curve.CURVE.Fp.BYTES + 1)
+        )
+        key.setParam(
+          iana.EC2KeyParameterY,
+          pubkey.subarray(curve.CURVE.Fp.BYTES + 1)
+        )
+        break
+      default:
+    }
+
     if (kid) {
       key.kid = utf8ToBytes(kid)
     }
@@ -156,6 +178,16 @@ export class ECDSAKey extends Key implements Signer, Verifier {
       prehash: true,
     })
   }
+}
+
+function getAlg(keySize: number): number {
+  let alg = iana.AlgorithmES256
+  if (keySize === 48) {
+    alg = iana.AlgorithmES384
+  } else if (keySize >= 65) {
+    alg = iana.AlgorithmES512
+  }
+  return alg
 }
 
 export function getCrv(alg: number): number {
