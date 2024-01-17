@@ -20,7 +20,7 @@ export interface Encryptor {
 }
 
 export interface MACer {
-  mac(message: Uint8Array, aad?: Uint8Array): Uint8Array
+  mac(message: Uint8Array): Uint8Array
 }
 
 export interface Signer {

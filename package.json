@@ -1,7 +1,7 @@
 {
   "name": "@ldclabs/cose-ts",
   "type": "module",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "author": "0xZensh <txr1883@gmail.com>",
   "description": "Implemented Keys, Algorithms (RFC9053), COSE (RFC9052) and CWT (RFC8392) in TypeScript.",
   "license": "MIT",

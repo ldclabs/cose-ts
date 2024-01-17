@@ -1,13 +1,13 @@
-# Keys, Algorithms, COSE and CWT in TypeScript
+# Keys, Algorithms, COSE and CWT
 
 [![CI](https://github.com/ldclabs/cose-ts/actions/workflows/ci.yml/badge.svg)](https://github.com/ldclabs/cose-ts/actions/workflows/ci.yml)
 [![Codecov](https://codecov.io/gh/ldclabs/cose-ts/branch/main/graph/badge.svg)](https://codecov.io/gh/ldclabs/cose-ts)
 [![License](http://img.shields.io/badge/license-mit-blue.svg?style=flat-square)](https://raw.githubusercontent.com/ldclabs/cose-ts/main/LICENSE)
 
-*A golang library for the [CBOR Object Signing and Encryption (COSE)][cose-spec] and [CBOR Web Token (CWT)][cwt-spec].*
+*A typeScript library for the [CBOR Object Signing and Encryption (COSE)][cose-spec] and [CBOR Web Token (CWT)][cwt-spec].*
 
-Golang version: [https://github.com/ldclabs/cose](https://github.com/ldclabs/cose)
-Rust version: [https://github.com/google/coset](https://github.com/google/coset)
++ Golang version: [https://github.com/ldclabs/cose](https://github.com/ldclabs/cose)
++ Rust version: [https://github.com/google/coset](https://github.com/google/coset)
 
 ## Security Reviews
 
@@ -34,4 +34,4 @@ Todo.
 ## License
 Copyright © 2022-2024 [LDC Labs](https://github.com/ldclabs).
 
-ldclabs/cose is licensed under the MIT License. See [LICENSE](LICENSE) for the full license text.
+ldclabs/cose-ts is licensed under the MIT License. See [LICENSE](LICENSE) for the full license text.
