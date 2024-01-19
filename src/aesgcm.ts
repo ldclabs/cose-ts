@@ -5,22 +5,22 @@ import { gcm } from '@noble/ciphers/webcrypto/aes'
 import * as iana from './iana'
 import { RawMap, assertBytes } from './map'
 import { Key, type Encryptor } from './key'
-import { utf8ToBytes, randomBytes } from './utils'
+import { randomBytes } from './utils'
 
 // TODO: more checks
 // AesGcmKey implements content encryption algorithm AES-GCM for COSE as defined in RFC9053.
 // https://datatracker.ietf.org/doc/html/rfc9053#name-aes-gcm.
 export class AesGcmKey extends Key implements Encryptor {
-  static generate(alg: number, kid?: string): AesGcmKey {
+  static generate(alg: number, kid?: Uint8Array): AesGcmKey {
     return AesGcmKey.fromSecret(randomBytes(getKeySize(alg)), kid)
   }
 
-  static fromSecret(secret: Uint8Array, kid?: string): AesGcmKey {
+  static fromSecret(secret: Uint8Array, kid?: Uint8Array): AesGcmKey {
     const alg = getAlg(assertBytes(secret, 'secret'))
     const key = new AesGcmKey()
     key.alg = alg
     if (kid) {
-      key.kid = utf8ToBytes(kid)
+      key.kid = kid
     }
     key.setParam(iana.SymmetricKeyParameterK, secret)
     return key

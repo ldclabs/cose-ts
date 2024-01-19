@@ -3,7 +3,7 @@
 
 import { KVMap, RawMap, assertIntOrText, assertBytes } from './map'
 import * as iana from './iana'
-import { decodeCBOR } from './utils'
+import { decodeCBOR, encodeCBOR } from './utils'
 
 export interface Encryptor {
   nonceSize(): number
@@ -85,5 +85,16 @@ export class Key extends KVMap {
 
   set baseIV(iv: Uint8Array) {
     this.setParam(iana.KeyParameterBaseIV, assertBytes(iv, 'Base IV'))
+  }
+
+  // getKid gets the kid parameter with CBOR decoding.
+  getKid<T>(): T {
+    return decodeCBOR(this.getBytes(iana.KeyParameterKid, 'kid'))
+  }
+
+  // setKid sets the kid parameter with CBOR encoding.
+  setKid<T>(kid: T): this {
+    this.setParam(iana.KeyParameterKid, assertBytes(encodeCBOR(kid), 'kid'))
+    return this
   }
 }

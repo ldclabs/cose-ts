@@ -13,7 +13,7 @@ describe('Mac0Message Examples', () => {
     const key = HMACKey.fromSecret(
       base64ToBytes('hJtXIZ2uSN5kbQfbtTNWbpdmhkV8FJG-Onbc6mxCcYg'),
       iana.AlgorithmHMAC_256_256,
-      'our-secret'
+      utf8ToBytes('our-secret')
     )
     const msg = new Mac0Message(
       utf8ToBytes('This is the content.'),

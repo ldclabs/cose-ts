@@ -6,7 +6,13 @@ import { RawMap } from './map'
 import { Key, type Verifier, Signer } from './key'
 import * as iana from './iana'
 import { decodeCBOR, encodeCBOR } from './utils'
-import { skipTag, withTag, CwtPrefix, Sign1MessagePrefix } from './tag'
+import {
+  skipTag,
+  withTag,
+  CwtPrefix,
+  Sign1MessagePrefix,
+  CBORSelfPrefix,
+} from './tag'
 
 // Sign1Message represents a COSE_Sign1 object.
 //
@@ -34,7 +40,10 @@ export class Sign1Message {
     coseData: Uint8Array,
     externalData?: Uint8Array
   ): Sign1Message {
-    const data = skipTag(Sign1MessagePrefix, skipTag(CwtPrefix, coseData))
+    const data = skipTag(
+      Sign1MessagePrefix,
+      skipTag(CwtPrefix, skipTag(CBORSelfPrefix, coseData))
+    )
 
     const [protectedBytes, unprotected, payload, signature] = decodeCBOR(
       data

@@ -60,6 +60,8 @@ const privKey = Ed25519Key.generate()
 const pubKey = privKey.public()
 // const pubKey = Ed25519Key.fromPublic(32_bytes_public)
 
+const externalData = utf8ToBytes('@ldclabs/cose-ts') // optional
+
 // signing
 const claims = new Claims()
 claims.iss = 'ldclabs'
@@ -69,14 +71,14 @@ claims.exp = Math.floor(Date.now() / 1000) + 3600
 claims.cti = randomBytes(16)
 
 const cwtMsg = new Sign1Message(claims.toBytes())
-const cwtData = cwtMsg.toBytes(privKey, utf8ToBytes('@ldclabs/cose-ts'))
+const cwtData = cwtMsg.toBytes(privKey, externalData)
 // const cwtDataWithTag = withCWTTag(cwtData)
 
 // verifying
 const cwtMsg2 = Sign1Message.fromBytes(
   pubKey,
   cwtData, // or cwtDataWithTag
-  utf8ToBytes('@ldclabs/cose-ts')
+  externalData
 )
 const claims2 = Claims.fromBytes(cwtMsg2.payload)
 const validator = new Validator({ expectedIssuer: 'ldclabs' })

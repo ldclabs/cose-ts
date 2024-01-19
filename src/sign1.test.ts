@@ -19,7 +19,7 @@ describe('Sign1Message Examples', () => {
   it('sign-pass-02: External', async () => {
     const key = ECDSAKey.fromSecret(
       base64ToBytes('V8kgd2ZBRuh2dgyVINBUqpPDr7BOMGcF22CQMIUHtNM'),
-      '11'
+      utf8ToBytes('11')
     )
     assert.equal(key.kty, iana.KeyTypeEC2)
     assert.equal(key.alg, iana.AlgorithmES256)

@@ -14,7 +14,7 @@ describe('Encrypt0Message Examples', () => {
   it('env-pass-02: Add external data', async () => {
     const key = AesGcmKey.fromSecret(
       base64ToBytes('hJtXIZ2uSN5kbQfbtTNWbg'),
-      'our-secret'
+      utf8ToBytes('our-secret')
     )
     assert.equal(key.alg, iana.AlgorithmA128GCM)
 

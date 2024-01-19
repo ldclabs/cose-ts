@@ -6,7 +6,13 @@ import { RawMap } from './map'
 import { Key, type MACer } from './key'
 import * as iana from './iana'
 import { decodeCBOR, encodeCBOR, compareBytes } from './utils'
-import { skipTag, withTag, CwtPrefix, Mac0MessagePrefix } from './tag'
+import {
+  skipTag,
+  withTag,
+  CwtPrefix,
+  Mac0MessagePrefix,
+  CBORSelfPrefix,
+} from './tag'
 
 // Mac0Message represents a COSE_Mac0 object.
 //
@@ -36,7 +42,10 @@ export class Mac0Message {
     coseData: Uint8Array,
     externalData?: Uint8Array
   ): Mac0Message {
-    const data = skipTag(Mac0MessagePrefix, skipTag(CwtPrefix, coseData))
+    const data = skipTag(
+      Mac0MessagePrefix,
+      skipTag(CwtPrefix, skipTag(CBORSelfPrefix, coseData))
+    )
 
     const [protectedBytes, unprotected, payload, tag] = decodeCBOR(data) as [
       Uint8Array,

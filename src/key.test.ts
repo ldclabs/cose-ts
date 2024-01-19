@@ -2,11 +2,34 @@
 // See the file LICENSE for licensing terms.
 
 import { assert, describe, it } from 'vitest'
-import { bytesToHex, hexToBytes, utf8ToBytes } from './utils'
+import {
+  bytesToHex,
+  hexToBytes,
+  utf8ToBytes,
+  compareBytes,
+  encodeCBOR,
+} from './utils'
 import * as iana from './iana'
 import { Key } from './key'
 
 describe('Key Examples', () => {
+  it('Key', () => {
+    const key = new Key()
+    key.kty = iana.KeyTypeSymmetric
+    key.kid = utf8ToBytes('Symmetric128')
+    assert.equal(compareBytes(key.kid, utf8ToBytes('Symmetric128')), 0)
+    key.setKid('Symmetric128')
+    assert.equal(key.getKid(), 'Symmetric128')
+    assert.equal(compareBytes(key.kid, encodeCBOR('Symmetric128')), 0)
+
+    key.setKid(new Uint8Array([1, 2, 3, 4]))
+    assert.equal(compareBytes(key.getKid(), new Uint8Array([1, 2, 3, 4])), 0)
+    assert.equal(
+      compareBytes(key.kid, encodeCBOR(new Uint8Array([1, 2, 3, 4]))),
+      0
+    )
+  })
+
   it('128-Bit Symmetric COSE_Key', () => {
     const key = new Key()
     key.kty = iana.KeyTypeSymmetric

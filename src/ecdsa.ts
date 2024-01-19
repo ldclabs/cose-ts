@@ -8,18 +8,17 @@ import { CurveFn } from '@noble/curves/abstract/weierstrass'
 import * as iana from './iana'
 import { RawMap, assertBytes } from './map'
 import { Key, type Signer, Verifier } from './key'
-import { utf8ToBytes } from './utils'
 
 // TODO: more checks
 // ECDSAKey implements signature algorithm ECDSA for COSE as defined in RFC9053.
 // https://datatracker.ietf.org/doc/html/rfc9053#name-ecdsa.
 export class ECDSAKey extends Key implements Signer, Verifier {
-  static generate(alg: number, kid?: string): ECDSAKey {
+  static generate(alg: number, kid?: Uint8Array): ECDSAKey {
     const curve = getCurve(alg)
     return ECDSAKey.fromSecret(curve.utils.randomPrivateKey(), kid)
   }
 
-  static fromSecret(secret: Uint8Array, kid?: string): ECDSAKey {
+  static fromSecret(secret: Uint8Array, kid?: Uint8Array): ECDSAKey {
     assertBytes(secret, 'secret')
     const alg = getAlg(secret.length)
     const key = new ECDSAKey()
@@ -34,12 +33,12 @@ export class ECDSAKey extends Key implements Signer, Verifier {
     key.setParam(iana.EC2KeyParameterD, secret)
 
     if (kid) {
-      key.kid = utf8ToBytes(kid)
+      key.kid = kid
     }
     return key
   }
 
-  static fromPublic(pubkey: Uint8Array, kid?: string): ECDSAKey {
+  static fromPublic(pubkey: Uint8Array, kid?: Uint8Array): ECDSAKey {
     assertBytes(pubkey, 'public key')
     if (pubkey.length < 33) {
       throw new Error(
@@ -79,7 +78,7 @@ export class ECDSAKey extends Key implements Signer, Verifier {
     }
 
     if (kid) {
-      key.kid = utf8ToBytes(kid)
+      key.kid = kid
     }
     return key
   }

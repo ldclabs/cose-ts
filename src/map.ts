@@ -132,6 +132,17 @@ export class KVMap {
     return this
   }
 
+  getCBORParam<T>(key: Label): T | undefined {
+    return this._raw.has(key)
+      ? decodeCBOR(assertBytes(this._raw.get(key), String(key)))
+      : undefined
+  }
+
+  setCBORParam<T>(key: Label, value: T): this {
+    this._raw.set(key, encodeCBOR(value))
+    return this
+  }
+
   clone(): RawMap {
     return new Map(this._raw)
   }

@@ -4,18 +4,22 @@
 import * as iana from './iana'
 import { RawMap, assertBytes } from './map'
 import { Key, type MACer } from './key'
-import { utf8ToBytes, randomBytes } from './utils'
+import { randomBytes } from './utils'
 import { hmac, getHash } from './hash'
 
 // TODO: more checks
 // HMACKey implements message authentication code algorithm HMAC for COSE as defined in RFC9053.
 // https://datatracker.ietf.org/doc/html/rfc9053#name-hash-based-message-authenti.
 export class HMACKey extends Key implements MACer {
-  static generate(alg: number, kid?: string): HMACKey {
+  static generate(alg: number, kid?: Uint8Array): HMACKey {
     return HMACKey.fromSecret(randomBytes(getKeySize(alg)), alg, kid)
   }
 
-  static fromSecret(secret: Uint8Array, alg: number, kid?: string): HMACKey {
+  static fromSecret(
+    secret: Uint8Array,
+    alg: number,
+    kid?: Uint8Array
+  ): HMACKey {
     if (assertBytes(secret, 'secret').length != getKeySize(alg)) {
       throw new Error(
         `cose-ts: HMACKey.fromSecret: secret size mismatch, expected ${getKeySize(
@@ -27,7 +31,7 @@ export class HMACKey extends Key implements MACer {
     const key = new HMACKey()
     key.alg = alg
     if (kid) {
-      key.kid = utf8ToBytes(kid)
+      key.kid = kid
     }
     key.setParam(iana.SymmetricKeyParameterK, secret)
     return key

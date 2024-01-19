@@ -7,7 +7,13 @@ import { RawMap } from './map'
 import { Key, type Encryptor } from './key'
 import * as iana from './iana'
 import { decodeCBOR, encodeCBOR } from './utils'
-import { skipTag, withTag, CwtPrefix, Encrypt0MessagePrefix } from './tag'
+import {
+  skipTag,
+  withTag,
+  CwtPrefix,
+  Encrypt0MessagePrefix,
+  CBORSelfPrefix,
+} from './tag'
 
 // Encrypt0Message represents a COSE_Encrypt0 object.
 //
@@ -35,7 +41,10 @@ export class Encrypt0Message {
     coseData: Uint8Array,
     externalData?: Uint8Array
   ): Promise<Encrypt0Message> {
-    const data = skipTag(Encrypt0MessagePrefix, skipTag(CwtPrefix, coseData))
+    const data = skipTag(
+      Encrypt0MessagePrefix,
+      skipTag(CwtPrefix, skipTag(CBORSelfPrefix, coseData))
+    )
 
     const [protectedBytes, unprotected, ciphertext] = decodeCBOR(data) as [
       Uint8Array,

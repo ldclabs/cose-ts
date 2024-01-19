@@ -1,7 +1,7 @@
 {
   "name": "@ldclabs/cose-ts",
   "type": "module",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "author": "0xZensh <txr1883@gmail.com>",
   "description": "Implemented Keys, Algorithms (RFC9053), COSE (RFC9052) and CWT (RFC8392) in TypeScript.",
   "license": "MIT",
@@ -120,14 +120,14 @@
     "test": "vitest src --coverage --run"
   },
   "devDependencies": {
-    "@types/node": "^20.11.4",
+    "@types/node": "^20.11.5",
     "@typescript-eslint/eslint-plugin": "^6.19.0",
     "@typescript-eslint/parser": "^6.19.0",
-    "@vitest/coverage-v8": "^1.2.0",
+    "@vitest/coverage-v8": "^1.2.1",
     "eslint": "^8.56.0",
     "eslint-plugin-import": "^2.29.1",
     "typescript": "^5.3.3",
-    "vitest": "^1.2.0"
+    "vitest": "^1.2.1"
   },
   "keywords": [
     "cose",
@@ -137,9 +137,9 @@
     "RFC9053"
   ],
   "dependencies": {
-    "cborg": "^4.0.8",
-    "@noble/ciphers": "^0.4.1",
-    "@noble/curves": "^1.3.0",
-    "@noble/hashes": "^1.3.3"
+    "@noble/ciphers": "=0.4.1",
+    "@noble/curves": "=1.3.0",
+    "@noble/hashes": "=1.3.3",
+    "cborg": "^4.0.8"
   }
 }
