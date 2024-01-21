@@ -11,11 +11,11 @@ import { randomBytes } from './utils'
 // ChaCha20Poly1305Key implements content encryption algorithm ChaCha20/Poly1305 for COSE as defined in RFC9053.
 // https://datatracker.ietf.org/doc/html/rfc9053#name-chacha20-and-poly1305.
 export class ChaCha20Poly1305Key extends Key implements Encryptor {
-  static generate(kid?: Uint8Array): ChaCha20Poly1305Key {
+  static generate<T>(kid?: T): ChaCha20Poly1305Key {
     return ChaCha20Poly1305Key.fromSecret(randomBytes(32), kid)
   }
 
-  static fromSecret(secret: Uint8Array, kid?: Uint8Array): ChaCha20Poly1305Key {
+  static fromSecret<T>(secret: Uint8Array, kid?: T): ChaCha20Poly1305Key {
     assertBytes(secret, 'secret')
     if (secret.length !== 32) {
       throw new Error(
@@ -23,8 +23,8 @@ export class ChaCha20Poly1305Key extends Key implements Encryptor {
       )
     }
     const key = new ChaCha20Poly1305Key()
-    if (kid) {
-      key.kid = kid
+    if (kid != null) {
+      key.setKid(kid)
     }
     key.setParam(iana.SymmetricKeyParameterK, secret)
     return key

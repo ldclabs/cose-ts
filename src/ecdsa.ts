@@ -13,12 +13,12 @@ import { Key, type Signer, Verifier } from './key'
 // ECDSAKey implements signature algorithm ECDSA for COSE as defined in RFC9053.
 // https://datatracker.ietf.org/doc/html/rfc9053#name-ecdsa.
 export class ECDSAKey extends Key implements Signer, Verifier {
-  static generate(alg: number, kid?: Uint8Array): ECDSAKey {
+  static generate<T>(alg: number, kid?: T): ECDSAKey {
     const curve = getCurve(alg)
     return ECDSAKey.fromSecret(curve.utils.randomPrivateKey(), kid)
   }
 
-  static fromSecret(secret: Uint8Array, kid?: Uint8Array): ECDSAKey {
+  static fromSecret<T>(secret: Uint8Array, kid?: T): ECDSAKey {
     assertBytes(secret, 'secret')
     const alg = getAlg(secret.length)
     const key = new ECDSAKey()
@@ -32,13 +32,13 @@ export class ECDSAKey extends Key implements Signer, Verifier {
     }
     key.setParam(iana.EC2KeyParameterD, secret)
 
-    if (kid) {
-      key.kid = kid
+    if (kid != null) {
+      key.setKid(kid)
     }
     return key
   }
 
-  static fromPublic(pubkey: Uint8Array, kid?: Uint8Array): ECDSAKey {
+  static fromPublic<T>(pubkey: Uint8Array, kid?: T): ECDSAKey {
     assertBytes(pubkey, 'public key')
     if (pubkey.length < 33) {
       throw new Error(
@@ -77,8 +77,8 @@ export class ECDSAKey extends Key implements Signer, Verifier {
       default:
     }
 
-    if (kid) {
-      key.kid = kid
+    if (kid != null) {
+      key.setKid(kid)
     }
     return key
   }

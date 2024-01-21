@@ -11,16 +11,16 @@ import { randomBytes } from './utils'
 // AesGcmKey implements content encryption algorithm AES-GCM for COSE as defined in RFC9053.
 // https://datatracker.ietf.org/doc/html/rfc9053#name-aes-gcm.
 export class AesGcmKey extends Key implements Encryptor {
-  static generate(alg: number, kid?: Uint8Array): AesGcmKey {
+  static generate<T>(alg: number, kid?: T): AesGcmKey {
     return AesGcmKey.fromSecret(randomBytes(getKeySize(alg)), kid)
   }
 
-  static fromSecret(secret: Uint8Array, kid?: Uint8Array): AesGcmKey {
+  static fromSecret<T>(secret: Uint8Array, kid?: T): AesGcmKey {
     const alg = getAlg(assertBytes(secret, 'secret'))
     const key = new AesGcmKey()
     key.alg = alg
-    if (kid) {
-      key.kid = kid
+    if (kid != null) {
+      key.setKid(kid)
     }
     key.setParam(iana.SymmetricKeyParameterK, secret)
     return key

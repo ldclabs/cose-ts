@@ -94,7 +94,7 @@ export class Key extends KVMap {
 
   // setKid sets the kid parameter with CBOR encoding.
   setKid<T>(kid: T): this {
-    this.setParam(iana.KeyParameterKid, assertBytes(encodeCBOR(kid), 'kid'))
+    this.setParam(iana.KeyParameterKid, encodeCBOR(kid))
     return this
   }
 }

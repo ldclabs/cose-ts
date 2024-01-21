@@ -11,11 +11,11 @@ import { randomBytes } from './utils'
 // Ed25519Key implements signature algorithm Ed25519 for COSE as defined in RFC9053.
 // https://datatracker.ietf.org/doc/html/rfc9053#name-edwards-curve-digital-signa.
 export class Ed25519Key extends Key implements Signer, Verifier {
-  static generate(kid?: Uint8Array): Ed25519Key {
+  static generate<T>(kid?: T): Ed25519Key {
     return Ed25519Key.fromSecret(randomBytes(32), kid)
   }
 
-  static fromSecret(secret: Uint8Array, kid?: Uint8Array): Ed25519Key {
+  static fromSecret<T>(secret: Uint8Array, kid?: T): Ed25519Key {
     assertBytes(secret, 'secret')
     if (secret.length !== 32) {
       throw new Error(
@@ -25,13 +25,13 @@ export class Ed25519Key extends Key implements Signer, Verifier {
 
     const key = new Ed25519Key()
     key.setParam(iana.OKPKeyParameterD, secret)
-    if (kid) {
-      key.kid = kid
+    if (kid != null) {
+      key.setKid(kid)
     }
     return key
   }
 
-  static fromPublic(pubkey: Uint8Array, kid?: Uint8Array): Ed25519Key {
+  static fromPublic<T>(pubkey: Uint8Array, kid?: T): Ed25519Key {
     assertBytes(pubkey, 'public key')
     if (pubkey.length !== 32) {
       throw new Error(
@@ -42,8 +42,8 @@ export class Ed25519Key extends Key implements Signer, Verifier {
     const key = new Ed25519Key()
 
     key.setParam(iana.OKPKeyParameterX, pubkey)
-    if (kid) {
-      key.kid = kid
+    if (kid != null) {
+      key.setKid(kid)
     }
     return key
   }
