@@ -10,12 +10,15 @@ describe('ChaCha20Poly1305Key Examples', () => {
   // https://github.com/cose-wg/Examples/tree/master/chacha-poly-examples
   // https://github.com/cose-wg/Examples/pull/104
   it('Examples', async () => {
-    const key = ChaCha20Poly1305Key.fromSecret(
+    let key = ChaCha20Poly1305Key.fromSecret(
       hexToBytes(
         '0F1E2D3C4B5A69788796A5B4C3D2E1F01F2E3D4C5B6A798897A6B5C4D3E2F100'
       )
     )
     assert.equal(key.alg, iana.AlgorithmChaCha20Poly1305)
+
+    const keyBytes = key.toBytes()
+    key = ChaCha20Poly1305Key.fromBytes(keyBytes)
 
     const ciphertext = await key.encrypt(
       utf8ToBytes('This is the content.'),

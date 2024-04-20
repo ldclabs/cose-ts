@@ -8,10 +8,13 @@ import { Ed25519Key } from './ed25519'
 
 describe('Ed25519Key Examples', () => {
   it('Signer and Verifier', () => {
-    const key = Ed25519Key.generate()
+    let key = Ed25519Key.generate()
     assert.equal(key.kty, iana.KeyTypeOKP)
     assert.equal(key.alg, iana.AlgorithmEdDSA)
     assert.equal(key.getInt(iana.OKPKeyParameterCrv), iana.EllipticCurveEd25519)
+
+    const keyBytes = key.toBytes()
+    key = Ed25519Key.fromBytes(keyBytes)
 
     const sig = key.sign(utf8ToBytes('This is the content.'))
     assert.equal(key.verify(utf8ToBytes('This is the content.'), sig), true)

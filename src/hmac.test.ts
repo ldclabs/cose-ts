@@ -37,7 +37,9 @@ describe('HMACKey Examples', () => {
     ]
 
     for (const [alg, secret, message, tag] of cases) {
-      const key = HMACKey.fromSecret(hexToBytes(secret), alg)
+      let key = HMACKey.fromSecret(hexToBytes(secret), alg)
+      const keyBytes = key.toBytes()
+      key = HMACKey.fromBytes(keyBytes)
       assert.equal(bytesToHex(key.mac(hexToBytes(message))).toUpperCase(), tag)
     }
   })

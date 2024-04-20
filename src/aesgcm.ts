@@ -1,16 +1,20 @@
 // (c) 2023-present, LDC Labs. All rights reserved.
 // See the file LICENSE for licensing terms.
 
-import { gcm } from '@noble/ciphers/webcrypto/aes'
+import { gcm } from '@noble/ciphers/webcrypto'
 import * as iana from './iana'
 import { RawMap, assertBytes } from './map'
 import { Key, type Encryptor } from './key'
-import { randomBytes } from './utils'
+import { randomBytes, decodeCBOR } from './utils'
 
 // TODO: more checks
 // AesGcmKey implements content encryption algorithm AES-GCM for COSE as defined in RFC9053.
 // https://datatracker.ietf.org/doc/html/rfc9053#name-aes-gcm.
 export class AesGcmKey extends Key implements Encryptor {
+  static fromBytes(data: Uint8Array): AesGcmKey {
+    return new AesGcmKey(decodeCBOR(data))
+  }
+
   static generate<T>(alg: number, kid?: T): AesGcmKey {
     return AesGcmKey.fromSecret(randomBytes(getKeySize(alg)), kid)
   }

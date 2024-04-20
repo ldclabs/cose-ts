@@ -13,10 +13,13 @@ describe('ECDSAKey Examples', () => {
       iana.AlgorithmES384,
       iana.AlgorithmES512,
     ]) {
-      const key = ECDSAKey.generate(alg)
+      let key = ECDSAKey.generate(alg)
       assert.equal(key.kty, iana.KeyTypeEC2)
       assert.equal(key.alg, alg)
       assert.equal(key.getInt(iana.EC2KeyParameterCrv), getCrv(alg))
+
+      const keyBytes = key.toBytes()
+      key = ECDSAKey.fromBytes(keyBytes)
 
       const sig = key.sign(utf8ToBytes('This is the content.'))
       assert.equal(key.verify(utf8ToBytes('This is the content.'), sig), true)

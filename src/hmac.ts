@@ -4,13 +4,18 @@
 import * as iana from './iana'
 import { RawMap, assertBytes } from './map'
 import { Key, type MACer } from './key'
-import { randomBytes } from './utils'
+import { randomBytes, decodeCBOR } from './utils'
 import { hmac, getHash } from './hash'
+
 
 // TODO: more checks
 // HMACKey implements message authentication code algorithm HMAC for COSE as defined in RFC9053.
 // https://datatracker.ietf.org/doc/html/rfc9053#name-hash-based-message-authenti.
 export class HMACKey extends Key implements MACer {
+  static fromBytes(data: Uint8Array): HMACKey {
+    return new HMACKey(decodeCBOR(data))
+  }
+
   static generate<T>(alg: number, kid?: T): HMACKey {
     return HMACKey.fromSecret(randomBytes(getKeySize(alg)), alg, kid)
   }

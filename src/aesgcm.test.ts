@@ -8,10 +8,13 @@ import { AesGcmKey } from './aesgcm'
 
 describe('AesGcmKey Examples', () => {
   it('AlgorithmA128GCM', async () => {
-    const key = AesGcmKey.fromSecret(
+    let key = AesGcmKey.fromSecret(
       hexToBytes('849B57219DAE48DE646D07DBB533566E')
     )
     assert.equal(key.alg, iana.AlgorithmA128GCM)
+
+    const keyBytes = key.toBytes()
+    key = AesGcmKey.fromBytes(keyBytes)
 
     const ciphertext = await key.encrypt(
       utf8ToBytes('This is the content.'),

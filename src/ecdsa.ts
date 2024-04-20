@@ -8,11 +8,16 @@ import { CurveFn } from '@noble/curves/abstract/weierstrass'
 import * as iana from './iana'
 import { RawMap, assertBytes } from './map'
 import { Key, type Signer, Verifier } from './key'
+import { decodeCBOR } from './utils'
 
 // TODO: more checks
 // ECDSAKey implements signature algorithm ECDSA for COSE as defined in RFC9053.
 // https://datatracker.ietf.org/doc/html/rfc9053#name-ecdsa.
 export class ECDSAKey extends Key implements Signer, Verifier {
+  static fromBytes(data: Uint8Array): ECDSAKey {
+    return new ECDSAKey(decodeCBOR(data))
+  }
+
   static generate<T>(alg: number, kid?: T): ECDSAKey {
     const curve = getCurve(alg)
     return ECDSAKey.fromSecret(curve.utils.randomPrivateKey(), kid)

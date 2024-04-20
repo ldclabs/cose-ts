@@ -5,12 +5,16 @@ import { ed25519 } from '@noble/curves/ed25519'
 import * as iana from './iana'
 import { RawMap, assertBytes } from './map'
 import { Key, type Signer, Verifier } from './key'
-import { randomBytes } from './utils'
+import { randomBytes, decodeCBOR } from './utils'
 
 // TODO: more checks
 // Ed25519Key implements signature algorithm Ed25519 for COSE as defined in RFC9053.
 // https://datatracker.ietf.org/doc/html/rfc9053#name-edwards-curve-digital-signa.
 export class Ed25519Key extends Key implements Signer, Verifier {
+  static fromBytes(data: Uint8Array): Ed25519Key {
+    return new Ed25519Key(decodeCBOR(data))
+  }
+
   static generate<T>(kid?: T): Ed25519Key {
     return Ed25519Key.fromSecret(randomBytes(32), kid)
   }

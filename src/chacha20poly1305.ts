@@ -5,12 +5,16 @@ import { chacha20poly1305 } from '@noble/ciphers/chacha'
 import * as iana from './iana'
 import { RawMap, assertBytes } from './map'
 import { Key, type Encryptor } from './key'
-import { randomBytes } from './utils'
+import { randomBytes, decodeCBOR } from './utils'
 
 // TODO: more checks
 // ChaCha20Poly1305Key implements content encryption algorithm ChaCha20/Poly1305 for COSE as defined in RFC9053.
 // https://datatracker.ietf.org/doc/html/rfc9053#name-chacha20-and-poly1305.
 export class ChaCha20Poly1305Key extends Key implements Encryptor {
+  static fromBytes(data: Uint8Array): ChaCha20Poly1305Key {
+    return new ChaCha20Poly1305Key(decodeCBOR(data))
+  }
+
   static generate<T>(kid?: T): ChaCha20Poly1305Key {
     return ChaCha20Poly1305Key.fromSecret(randomBytes(32), kid)
   }
