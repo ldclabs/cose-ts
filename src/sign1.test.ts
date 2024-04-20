@@ -9,9 +9,11 @@ import {
   utf8ToBytes,
   base64ToBytes,
   bytesToBase64Url,
+  compareBytes,
 } from './utils'
 import { Header } from './header'
 import { ECDSAKey } from './ecdsa'
+import { Ed25519Key } from './ed25519'
 import { Sign1Message } from './sign1'
 
 describe('Sign1Message Examples', () => {
@@ -48,6 +50,7 @@ describe('Sign1Message Examples', () => {
     assert.throw(() => Sign1Message.fromBytes(key, output))
 
     const pk = key.public()
+    assert.equal(compareBytes(pk.getKid(), utf8ToBytes('11')), 0)
     assert.equal(
       bytesToBase64Url(pk.getBytes(iana.EC2KeyParameterX)),
       'usWxHK2PmfnHKwXPS54m0kTcGJ90UiglWiGahtagnv8'
@@ -76,5 +79,49 @@ describe('Sign1Message Examples', () => {
       hexToBytes('11aa22bb33cc44dd55006699')
     )
     assert.equal(bytesToHex(msg4.payload), bytesToHex(msg.payload))
+  })
+
+  it('ed25519', async () => {
+    // 57c92077664146e876760c9520d054aa93c3afb04e306705db6090308507b4d3
+    const key = Ed25519Key.fromSecret(
+      base64ToBytes('V8kgd2ZBRuh2dgyVINBUqpPDr7BOMGcF22CQMIUHtNM'),
+      '11'
+    )
+    assert.equal(key.kty, iana.KeyTypeOKP)
+    assert.equal(key.alg, iana.AlgorithmEdDSA)
+    assert.equal(key.getInt(iana.EC2KeyParameterCrv), iana.EllipticCurveEd25519)
+
+    const msg = new Sign1Message(utf8ToBytes('This is the content.'))
+
+    const output = Sign1Message.withTag(
+      msg.toBytes(key, hexToBytes('11aa22bb33cc44dd55006699'))
+    )
+    assert.equal(
+      bytesToHex(output),
+      'd28443a10127a1044362313154546869732069732074686520636f6e74656e742e584011319ba8e8508d613f5cc83bbb64d37e1b310582777ff8a7ec587c12879fb9a83c593167a65438d2e6a8906ea1da4296a8fcb5d1ebed9a6de157f1ba2257070d'
+    )
+
+    const msg2 = Sign1Message.fromBytes(
+      key,
+      output,
+      hexToBytes('11aa22bb33cc44dd55006699')
+    )
+    assert.equal(bytesToHex(msg2.payload), bytesToHex(msg.payload))
+    assert.throw(() => Sign1Message.fromBytes(key, output))
+
+    const pk = key.public()
+    assert.equal(pk.getKid(), '11')
+    // 8373deeba9c0af9880e5c9e976ffda8522db9e3df20fddfe54b3a8c59cfe3c94
+    assert.equal(
+      bytesToBase64Url(pk.getBytes(iana.OKPKeyParameterX)),
+      'g3Pe66nAr5iA5cnpdv_ahSLbnj3yD93-VLOoxZz-PJQ'
+    )
+    const msg3 = Sign1Message.fromBytes(
+      pk,
+      output,
+      hexToBytes('11aa22bb33cc44dd55006699')
+    )
+
+    assert.equal(bytesToHex(msg3.payload), bytesToHex(msg.payload))
   })
 })
