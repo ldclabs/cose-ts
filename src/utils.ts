@@ -60,3 +60,9 @@ export function compareBytes(a: Uint8Array, b: Uint8Array): number {
 
   throw new Error('cose-ts: compareBytes: invalid arguments')
 }
+
+export function assertEqual(actual: unknown, expected: unknown, message: string = 'not equal'): void {
+  if (actual !== expected) {
+    throw new Error(`cose-ts: ${message}, expected ${expected}, got ${actual}`)
+  }
+}

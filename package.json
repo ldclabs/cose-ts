@@ -1,7 +1,7 @@
 {
   "name": "@ldclabs/cose-ts",
   "type": "module",
-  "version": "1.2.0",
+  "version": "1.3.0",
   "author": "0xZensh <txr1883@gmail.com>",
   "description": "Implemented Keys, Algorithms (RFC9053), COSE (RFC9052) and CWT (RFC8392) in TypeScript.",
   "license": "MIT",
@@ -65,6 +65,11 @@
       "browser": "./dist/header.js",
       "default": "./dist/header.js"
     },
+    "./hkdf": {
+      "types": "./dist/hkdf.d.ts",
+      "browser": "./dist/hkdf.js",
+      "default": "./dist/hkdf.js"
+    },
     "./hmac": {
       "types": "./dist/hmac.d.ts",
       "browser": "./dist/hmac.js",
@@ -74,6 +79,11 @@
       "types": "./dist/iana.d.ts",
       "browser": "./dist/iana.js",
       "default": "./dist/iana.js"
+    },
+    "./kdfcontext": {
+      "types": "./dist/kdfcontext.d.ts",
+      "browser": "./dist/kdfcontext.js",
+      "default": "./dist/kdfcontext.js"
     },
     "./key": {
       "types": "./dist/key.d.ts",
@@ -120,14 +130,14 @@
     "test": "vitest src --coverage --run"
   },
   "devDependencies": {
-    "@types/node": "^20.12.7",
-    "@typescript-eslint/eslint-plugin": "^6.21.0",
-    "@typescript-eslint/parser": "^6.21.0",
-    "@vitest/coverage-v8": "^1.5.0",
-    "eslint": "^8.57.0",
+    "@types/node": "^22.5.1",
+    "@typescript-eslint/eslint-plugin": "^8.3.0",
+    "@typescript-eslint/parser": "^8.3.0",
+    "@vitest/coverage-v8": "^2.0.5",
+    "eslint": "^9.9.1",
     "eslint-plugin-import": "^2.29.1",
-    "typescript": "^5.4.5",
-    "vitest": "^1.5.0"
+    "typescript": "^5.5.4",
+    "vitest": "^2.0.5"
   },
   "keywords": [
     "cose",
@@ -137,9 +147,9 @@
     "RFC9053"
   ],
   "dependencies": {
-    "@noble/ciphers": "^0.5.2",
-    "@noble/curves": "^1.4.0",
+    "@noble/ciphers": "^0.6.0",
+    "@noble/curves": "^1.5.0",
     "@noble/hashes": "^1.4.0",
-    "cborg": "^4.2.0"
+    "cborg": "^4.2.3"
   }
 }
