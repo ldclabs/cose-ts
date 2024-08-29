@@ -11,7 +11,7 @@ import {
   withTag,
   CwtPrefix,
   Mac0MessagePrefix,
-  CBORSelfPrefix,
+  CBORSelfPrefix
 } from './tag'
 
 // Mac0Message represents a COSE_Mac0 object.
@@ -33,7 +33,7 @@ export class Mac0Message {
       'MAC0',
       protectedHeader,
       externalData ?? new Uint8Array(),
-      payload,
+      payload
     ])
   }
 
@@ -121,7 +121,7 @@ export class Mac0Message {
       protectedBytes,
       this.unprotected.toRaw(),
       this.payload,
-      tag,
+      tag
     ])
   }
 }

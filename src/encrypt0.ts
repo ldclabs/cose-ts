@@ -12,7 +12,7 @@ import {
   withTag,
   CwtPrefix,
   Encrypt0MessagePrefix,
-  CBORSelfPrefix,
+  CBORSelfPrefix
 } from './tag'
 
 // Encrypt0Message represents a COSE_Encrypt0 object.
@@ -32,7 +32,7 @@ export class Encrypt0Message {
     return encodeCBOR([
       'Encrypt0',
       protectedHeader,
-      externalData ?? new Uint8Array(),
+      externalData ?? new Uint8Array()
     ])
   }
 

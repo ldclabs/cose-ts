@@ -9,13 +9,13 @@ export {
   utf8ToBytes,
   randomBytes,
   toBytes,
-  concatBytes,
+  concatBytes
 } from '@noble/hashes/utils'
 
 export function decodeCBOR<T>(data: Uint8Array): T {
   return decode(data, {
     useMaps: true,
-    rejectDuplicateMapKeys: true,
+    rejectDuplicateMapKeys: true
   }) as T
 }
 
@@ -61,7 +61,11 @@ export function compareBytes(a: Uint8Array, b: Uint8Array): number {
   throw new Error('cose-ts: compareBytes: invalid arguments')
 }
 
-export function assertEqual(actual: unknown, expected: unknown, message: string = 'not equal'): void {
+export function assertEqual(
+  actual: unknown,
+  expected: unknown,
+  message: string = 'not equal'
+): void {
   if (actual !== expected) {
     throw new Error(`cose-ts: ${message}, expected ${expected}, got ${actual}`)
   }

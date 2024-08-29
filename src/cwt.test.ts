@@ -83,7 +83,7 @@ describe('Claims & Validator', () => {
   it('NotBefore', () => {
     const validator = new Validator({
       allowMissingExpiration: true,
-      fixedNow: new Date(100 * 1000),
+      fixedNow: new Date(100 * 1000)
     })
     const claims = new Claims()
     validator.validate(claims)
@@ -94,7 +94,7 @@ describe('Claims & Validator', () => {
   it('IssuedAt', () => {
     const validator = new Validator({
       allowMissingExpiration: true,
-      expectIssuedInThePast: true,
+      expectIssuedInThePast: true
     })
     const claims = new Claims()
     validator.validate(claims)
@@ -107,7 +107,7 @@ describe('Claims & Validator', () => {
 
   it('ExpectedIssuer', () => {
     const validator = new Validator({
-      expectedIssuer: 'ldclabs',
+      expectedIssuer: 'ldclabs'
     })
 
     const claims = new Claims()
@@ -124,7 +124,7 @@ describe('Claims & Validator', () => {
 
   it('ExpectedAudience', () => {
     const validator = new Validator({
-      expectedAudience: 'ldclabs',
+      expectedAudience: 'ldclabs'
     })
 
     const claims = new Claims()

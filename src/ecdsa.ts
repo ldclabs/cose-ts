@@ -170,7 +170,7 @@ export class ECDSAKey extends Key implements Signer, Verifier {
     const curve = getCurve(this.alg)
     const sig = curve.sign(message, this.getSecretKey(), {
       lowS: curve.CURVE.lowS,
-      prehash: true,
+      prehash: true
     })
     return sig.toCompactRawBytes()
   }
@@ -179,7 +179,7 @@ export class ECDSAKey extends Key implements Signer, Verifier {
     const curve = getCurve(this.alg)
     return curve.verify(signature, message, this.getPublicKey(), {
       lowS: curve.CURVE.lowS,
-      prehash: true,
+      prehash: true
     })
   }
 }

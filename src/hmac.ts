@@ -7,7 +7,6 @@ import { Key, type MACer } from './key'
 import { randomBytes, decodeCBOR } from './utils'
 import { hmac, getHash } from './hash'
 
-
 // TODO: more checks
 // HMACKey implements message authentication code algorithm HMAC for COSE as defined in RFC9053.
 // https://datatracker.ietf.org/doc/html/rfc9053#name-hash-based-message-authenti.

@@ -15,15 +15,25 @@ describe('KDFContext Examples', () => {
     assert.deepEqual(ctx0.partyVInfo, new PartyInfo())
     assert.deepEqual(ctx0.suppPubInfo, new SuppPubInfo(0, new Header()))
     assert.equal(ctx0.suppPrivInfo, null)
-    assert.equal(bytesToHex(ctx0.toBytes()).toUpperCase(), '840083F6F6F683F6F6F6820040')
+    assert.equal(
+      bytesToHex(ctx0.toBytes()).toUpperCase(),
+      '840083F6F6F683F6F6F6820040'
+    )
 
-    const ctx = KDFContext.fromBytes(hexToBytes('840183F6F6F683F6F6F682188044A1013818'))
+    const ctx = KDFContext.fromBytes(
+      hexToBytes('840183F6F6F683F6F6F682188044A1013818')
+    )
     assert.equal(ctx.algorithmID, iana.AlgorithmA128GCM)
     assert.deepEqual(ctx.partyUInfo, new PartyInfo())
     assert.deepEqual(ctx.partyVInfo, new PartyInfo())
-    const kv = new Map([[iana.HeaderParameterAlg, iana.AlgorithmECDH_ES_HKDF_256]])
+    const kv = new Map([
+      [iana.HeaderParameterAlg, iana.AlgorithmECDH_ES_HKDF_256]
+    ])
     assert.deepEqual(ctx.suppPubInfo, new SuppPubInfo(128, new Header(kv)))
     assert.equal(ctx.suppPrivInfo, null)
-    assert.equal(bytesToHex(ctx.toBytes()).toUpperCase(), '840183F6F6F683F6F6F682188044A1013818')
+    assert.equal(
+      bytesToHex(ctx.toBytes()).toUpperCase(),
+      '840183F6F6F683F6F6F682188044A1013818'
+    )
   })
 })

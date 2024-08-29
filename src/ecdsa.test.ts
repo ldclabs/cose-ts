@@ -11,7 +11,7 @@ describe('ECDSAKey Examples', () => {
     for (const alg of [
       iana.AlgorithmES256,
       iana.AlgorithmES384,
-      iana.AlgorithmES512,
+      iana.AlgorithmES512
     ]) {
       let key = ECDSAKey.generate(alg)
       assert.equal(key.kty, iana.KeyTypeEC2)

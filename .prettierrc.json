@@ -3,9 +3,5 @@
   "quoteProps": "preserve",
   "semi": false,
   "trailingComma": "none",
-  "singleQuote": true,
-  "plugins": [
-    "prettier-plugin-svelte",
-    "prettier-plugin-tailwindcss"
-  ]
+  "singleQuote": true
 }

@@ -7,7 +7,7 @@ import {
   assertText,
   assertInt,
   assertBytes,
-  assertMap,
+  assertMap
 } from './map'
 import * as iana from './iana'
 import { decodeCBOR } from './utils'
@@ -132,7 +132,7 @@ export class Validator {
       expectIssuedInThePast: false,
       clockSkew: 0,
       fixedNow: null,
-      ...opts,
+      ...opts
     }
 
     if (this.opts.clockSkew > cwtMaxClockSkewMinutes * 60) {

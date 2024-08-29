@@ -6,7 +6,7 @@ import {
   compareBytes,
   bytesToBase64Url,
   base64ToBytes,
-  randomBytes,
+  randomBytes
 } from './utils'
 
 describe('utils', () => {

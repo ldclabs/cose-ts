@@ -1,5 +1,2 @@
-src/**/*.test.ts
-node_modules
-coverage
-dist
-debug
+.eslintrc.js
+src/declarations/**

@@ -1,8 +1,8 @@
 // (c) 2023-present, LDC Labs. All rights reserved.
 // See the file LICENSE for licensing terms.
 
-import { KVMap, RawMap, assertIntOrText, assertBytes } from './map'
 import * as iana from './iana'
+import { KVMap, RawMap, assertBytes, assertIntOrText } from './map'
 import { decodeCBOR, encodeCBOR } from './utils'
 
 export interface Encryptor {
@@ -29,6 +29,10 @@ export interface Signer {
 
 export interface Verifier {
   verify(message: Uint8Array, signature: Uint8Array): boolean
+}
+
+export interface ECDHer {
+  ecdh(remotePublic: Key): Uint8Array
 }
 
 // Key implements algorithms and key objects for COSE as defined in RFC9052 and RFC9053.

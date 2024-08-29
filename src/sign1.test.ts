@@ -9,7 +9,7 @@ import {
   utf8ToBytes,
   base64ToBytes,
   bytesToBase64Url,
-  compareBytes,
+  compareBytes
 } from './utils'
 import { Header } from './header'
 import { ECDSAKey } from './ecdsa'

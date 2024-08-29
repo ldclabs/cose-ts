@@ -7,7 +7,7 @@ import {
   hexToBytes,
   utf8ToBytes,
   compareBytes,
-  encodeCBOR,
+  encodeCBOR
 } from './utils'
 import * as iana from './iana'
 import { Key } from './key'

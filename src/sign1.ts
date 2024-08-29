@@ -11,7 +11,7 @@ import {
   withTag,
   CwtPrefix,
   Sign1MessagePrefix,
-  CBORSelfPrefix,
+  CBORSelfPrefix
 } from './tag'
 
 // Sign1Message represents a COSE_Sign1 object.
@@ -31,7 +31,7 @@ export class Sign1Message {
       'Signature1',
       protectedHeader,
       externalData ?? new Uint8Array(),
-      payload,
+      payload
     ])
   }
 
@@ -118,7 +118,7 @@ export class Sign1Message {
       protectedBytes,
       this.unprotected.toRaw(),
       this.payload,
-      sig,
+      sig
     ])
   }
 }
