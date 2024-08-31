@@ -2,15 +2,15 @@
 // See the file LICENSE for licensing terms.
 
 import { assert, describe, it } from 'vitest'
-import {
-  bytesToHex,
-  hexToBytes,
-  utf8ToBytes,
-  compareBytes,
-  encodeCBOR
-} from './utils'
 import * as iana from './iana'
 import { Key } from './key'
+import {
+  bytesToHex,
+  compareBytes,
+  encodeCBOR,
+  hexToBytes,
+  utf8ToBytes
+} from './utils'
 
 describe('Key Examples', () => {
   it('Key', () => {
@@ -42,6 +42,10 @@ describe('Key Examples', () => {
     const expected =
       'a40104024c53796d6d6574726963313238030a2050231f4c4d4d3051fdc2ec0a3851d5b383'
     assert.equal(bytesToHex(key.toBytes()), expected)
+    assert.equal(
+      bytesToHex(key.getSecret()),
+      '231f4c4d4d3051fdc2ec0a3851d5b383'
+    )
 
     const key2 = Key.fromBytes(hexToBytes(expected))
     assert.equal(bytesToHex(key2.toBytes()), expected)
@@ -61,6 +65,10 @@ describe('Key Examples', () => {
     const expected =
       'a40104024c53796d6d65747269633235360304205820403697de87af64611c1d32a05dab0fe1fcb715a86ab435f1ec99192d79569388'
     assert.equal(bytesToHex(key.toBytes()), expected)
+    assert.equal(
+      bytesToHex(key.getSecret()),
+      '403697de87af64611c1d32a05dab0fe1fcb715a86ab435f1ec99192d79569388'
+    )
 
     const key2 = Key.fromBytes(hexToBytes(expected))
     assert.equal(bytesToHex(key2.toBytes()), expected)
@@ -93,6 +101,10 @@ describe('Key Examples', () => {
     const expected =
       'a7010202524173796d6d6574726963454344534132353603262001215820143329cce7868e416927599cf65a34f3ce2ffda55a7eca69ed8919a394d42f0f22582060f7f1a780d8a783bfb7a2dd6b2796e8128dbbcef9d3d168db9529971a36e7b92358206c1382765aec5358f117733d281c1c7bdc39884d04a45a1e6c67c858bc206c19'
     assert.equal(bytesToHex(key.toBytes()), expected)
+    assert.equal(
+      bytesToHex(key.getSecret()),
+      '6c1382765aec5358f117733d281c1c7bdc39884d04a45a1e6c67c858bc206c19'
+    )
 
     const key2 = Key.fromBytes(hexToBytes(expected))
     assert.equal(bytesToHex(key2.toBytes()), expected)

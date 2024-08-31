@@ -101,4 +101,17 @@ export class Key extends KVMap {
     this.setParam(iana.KeyParameterKid, encodeCBOR(kid))
     return this
   }
+
+  getSecret(): Uint8Array {
+    switch (this.kty) {
+      case iana.KeyTypeOKP:
+        return this.getBytes(iana.OKPKeyParameterD, 'k')
+      case iana.KeyTypeEC2:
+        return this.getBytes(iana.EC2KeyParameterD, 'd')
+      case iana.KeyTypeSymmetric:
+        return this.getBytes(iana.SymmetricKeyParameterK, 'k')
+      default:
+        throw new Error('unsupported key type')
+    }
+  }
 }
