@@ -1,14 +1,14 @@
 // (c) 2023-present, LDC Labs. All rights reserved.
 // See the file LICENSE for licensing terms.
 
-import { CurveFn } from '@noble/curves/abstract/weierstrass'
 import { p256 } from '@noble/curves/p256'
 import { p384 } from '@noble/curves/p384'
 import { p521 } from '@noble/curves/p521'
 import { secp256k1 } from '@noble/curves/secp256k1'
+import { CurveFn } from '@noble/curves/abstract/weierstrass'
 import * as iana from './iana'
-import { Key, type Signer, Verifier } from './key'
 import { RawMap, assertBytes } from './map'
+import { Key, type Signer, Verifier } from './key'
 import { decodeCBOR } from './utils'
 
 // TODO: more checks

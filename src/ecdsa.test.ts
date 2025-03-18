@@ -2,9 +2,9 @@
 // See the file LICENSE for licensing terms.
 
 import { assert, describe, it } from 'vitest'
-import { ECDSAKey, getCrv } from './ecdsa'
-import * as iana from './iana'
 import { bytesToHex, utf8ToBytes } from './utils'
+import * as iana from './iana'
+import { ECDSAKey, getCrv } from './ecdsa'
 
 describe('ECDSAKey Examples', () => {
   it('Signer and Verifier', () => {
