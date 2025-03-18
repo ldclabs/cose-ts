@@ -2,7 +2,7 @@
 // See the file LICENSE for licensing terms.
 
 import { assert, describe, it } from 'vitest'
-import { bytesToHex, utf8ToBytes } from './utils'
+import { utf8ToBytes, bytesToHex } from './utils'
 import * as iana from './iana'
 import { ECDSAKey, getCrv } from './ecdsa'
 
