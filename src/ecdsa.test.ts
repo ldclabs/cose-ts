@@ -2,16 +2,17 @@
 // See the file LICENSE for licensing terms.
 
 import { assert, describe, it } from 'vitest'
-import { utf8ToBytes, bytesToHex } from './utils'
-import * as iana from './iana'
 import { ECDSAKey, getCrv } from './ecdsa'
+import * as iana from './iana'
+import { bytesToHex, utf8ToBytes } from './utils'
 
 describe('ECDSAKey Examples', () => {
   it('Signer and Verifier', () => {
     for (const alg of [
       iana.AlgorithmES256,
       iana.AlgorithmES384,
-      iana.AlgorithmES512
+      iana.AlgorithmES512,
+      iana.AlgorithmES256K
     ]) {
       let key = ECDSAKey.generate(alg)
       assert.equal(key.kty, iana.KeyTypeEC2)

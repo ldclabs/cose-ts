@@ -1,13 +1,14 @@
 // (c) 2023-present, LDC Labs. All rights reserved.
 // See the file LICENSE for licensing terms.
 
+import { CurveFn } from '@noble/curves/abstract/weierstrass'
 import { p256 } from '@noble/curves/p256'
 import { p384 } from '@noble/curves/p384'
 import { p521 } from '@noble/curves/p521'
-import { CurveFn } from '@noble/curves/abstract/weierstrass'
+import { secp256k1 } from '@noble/curves/secp256k1'
 import * as iana from './iana'
-import { RawMap, assertBytes } from './map'
 import { Key, type Signer, Verifier } from './key'
+import { RawMap, assertBytes } from './map'
 import { decodeCBOR } from './utils'
 
 // TODO: more checks
@@ -202,6 +203,8 @@ export function getCrv(alg: number): number {
       return iana.EllipticCurveP_384
     case iana.AlgorithmES512:
       return iana.EllipticCurveP_521
+    case iana.AlgorithmES256K:
+      return iana.EllipticCurveSecp256k1
     default:
       throw new Error(`cose-ts: unsupported ECDSA alg ${alg}`)
   }
@@ -215,6 +218,8 @@ export function getCurve(alg: number): CurveFn {
       return p384
     case iana.AlgorithmES512:
       return p521
+    case iana.AlgorithmES256K:
+      return secp256k1
     default:
       throw new Error(`cose-ts: unsupported ECDSA alg ${alg}`)
   }
