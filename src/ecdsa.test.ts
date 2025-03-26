@@ -25,7 +25,7 @@ describe('ECDSAKey Examples', () => {
       const sig = key.sign(utf8ToBytes('This is the content.'))
       assert.equal(key.verify(utf8ToBytes('This is the content.'), sig), true)
       assert.equal(key.verify(utf8ToBytes('This is the content'), sig), false)
-      const key2 = ECDSAKey.fromSecret(key.getSecretKey())
+      const key2 = ECDSAKey.fromSecret(key.getSecretKey(), null, alg)
       assert.equal(key2.verify(utf8ToBytes('This is the content.'), sig), true)
 
       const pk = key.public()
@@ -35,7 +35,7 @@ describe('ECDSAKey Examples', () => {
       const sig2 = key2.sign(utf8ToBytes('This is the content.'))
       assert.equal(bytesToHex(sig2), bytesToHex(sig))
 
-      const pk2 = ECDSAKey.fromPublic(pk.getPublicKey())
+      const pk2 = ECDSAKey.fromPublic(pk.getPublicKey(), null, alg)
       assert.equal(pk2.verify(utf8ToBytes('This is the content.'), sig2), true)
     }
   })

@@ -21,15 +21,16 @@ export class ECDSAKey extends Key implements Signer, Verifier {
 
   static generate<T>(alg: number, kid?: T): ECDSAKey {
     const curve = getCurve(alg)
-    return ECDSAKey.fromSecret(curve.utils.randomPrivateKey(), kid)
+    return ECDSAKey.fromSecret(curve.utils.randomPrivateKey(), kid, alg)
   }
 
-  static fromSecret<T>(secret: Uint8Array, kid?: T): ECDSAKey {
+  static fromSecret<T>(secret: Uint8Array, kid?: T, alg?: number): ECDSAKey {
     assertBytes(secret, 'secret')
-    const alg = getAlg(secret.length)
+    if (alg == undefined) {
+      alg = getAlg(secret.length)
+    }
     const key = new ECDSAKey()
     key.alg = alg
-
     const curve = getCurve(alg)
     if (!curve.utils.isValidPrivateKey(secret)) {
       throw new Error(
@@ -44,23 +45,23 @@ export class ECDSAKey extends Key implements Signer, Verifier {
     return key
   }
 
-  static fromPublic<T>(pubkey: Uint8Array, kid?: T): ECDSAKey {
+  static fromPublic<T>(pubkey: Uint8Array, kid?: T, alg?: number): ECDSAKey {
     assertBytes(pubkey, 'public key')
     if (pubkey.length < 33) {
       throw new Error(
         `cose-ts: ECDSAKey.fromPublic: public key size mismatch, expected at least 33, got ${pubkey.length}`
       )
     }
-
-    const alg =
-      pubkey[0] == 0x04
-        ? getAlg((pubkey.length - 1) / 2)
-        : getAlg(pubkey.length - 1)
+    if (alg == undefined) {
+      alg =
+        pubkey[0] == 0x04
+          ? getAlg((pubkey.length - 1) / 2)
+          : getAlg(pubkey.length - 1)
+    }
     const key = new ECDSAKey()
     key.alg = alg
     const curve = getCurve(alg)
     curve.ProjectivePoint.fromHex(pubkey) // validate public key
-
     switch (pubkey[0]) {
       case 0x02:
         key.setParam(iana.EC2KeyParameterY, false)
