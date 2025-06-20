@@ -1,13 +1,13 @@
 // (c) 2023-present, LDC Labs. All rights reserved.
 // See the file LICENSE for licensing terms.
 
+import { CurveFn } from '@noble/curves/abstract/weierstrass'
 import { p256 } from '@noble/curves/p256'
 import { p384 } from '@noble/curves/p384'
 import { p521 } from '@noble/curves/p521'
-import { CurveFn } from '@noble/curves/abstract/weierstrass'
 import * as iana from './iana'
-import { RawMap, assertBytes } from './map'
 import { Key, type Signer, Verifier } from './key'
+import { RawMap, assertBytes } from './map'
 import { decodeCBOR } from './utils'
 
 // TODO: more checks
@@ -169,7 +169,6 @@ export class ECDSAKey extends Key implements Signer, Verifier {
   sign(message: Uint8Array): Uint8Array {
     const curve = getCurve(this.alg)
     const sig = curve.sign(message, this.getSecretKey(), {
-      lowS: curve.CURVE.lowS,
       prehash: true
     })
     return sig.toCompactRawBytes()
@@ -178,7 +177,6 @@ export class ECDSAKey extends Key implements Signer, Verifier {
   verify(message: Uint8Array, signature: Uint8Array): boolean {
     const curve = getCurve(this.alg)
     return curve.verify(signature, message, this.getPublicKey(), {
-      lowS: curve.CURVE.lowS,
       prehash: true
     })
   }
