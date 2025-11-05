@@ -3,9 +3,10 @@
 
 import { assert, describe, it } from 'vitest'
 import {
-  compareBytes,
-  bytesToBase64Url,
   base64ToBytes,
+  bytesToBase64,
+  bytesToBase64Url,
+  compareBytes,
   randomBytes
 } from './utils'
 
@@ -44,10 +45,12 @@ describe('utils', () => {
   })
 
   it('bytesToBase64Url and base64ToBytes', () => {
-    for (let i = 0; i < 64; i++) {
+    for (let i = 0; i < 1024; i++) {
       const b = randomBytes(i)
-      const s = bytesToBase64Url(b)
-      assert.equal(compareBytes(base64ToBytes(s), b), 0)
+      const v1 = bytesToBase64(b)
+      const v2 = bytesToBase64Url(b)
+      assert.equal(compareBytes(base64ToBytes(v1), b), 0)
+      assert.equal(compareBytes(base64ToBytes(v2), b), 0)
     }
   })
 })
