@@ -2,8 +2,8 @@
 // See the file LICENSE for licensing terms.
 
 import { randomBytes } from './utils'
-import { Header } from './header'
-import { RawMap } from './map'
+import { Header, verifyHeaders } from './header'
+import { RawMap, assertIntOrText } from './map'
 import { Key, type Encryptor } from './key'
 import * as iana from './iana'
 import { decodeCBOR, encodeCBOR } from './utils'
@@ -53,14 +53,21 @@ export class Encrypt0Message {
     ]
     const protectedHeader = Header.fromBytes(protectedBytes)
     const unprotectedHeader = new Header(unprotected)
+    verifyHeaders(protectedHeader, unprotectedHeader)
     if (protectedHeader.has(iana.HeaderParameterAlg)) {
-      const alg = protectedHeader.getInt(iana.HeaderParameterAlg)
+      const alg = protectedHeader.getType(
+        iana.HeaderParameterAlg,
+        assertIntOrText,
+        'alg'
+      )
       if (alg !== key.alg) {
         throw new Error(
           `cose-ts: Encrypt0Message.fromBytes: alg mismatch, expected ${alg}, got ${key.alg}`
         )
       }
     }
+
+    assertIVParams(protectedHeader, unprotectedHeader, 'fromBytes')
 
     const ivSize = key.nonceSize()
     // TODO: support partial iv
@@ -106,7 +113,11 @@ export class Encrypt0Message {
         this.protected.setParam(iana.HeaderParameterAlg, key.alg)
       }
     } else if (this.protected.has(iana.HeaderParameterAlg)) {
-      const alg = this.protected.getInt(iana.HeaderParameterAlg)
+      const alg = this.protected.getType(
+        iana.HeaderParameterAlg,
+        assertIntOrText,
+        'alg'
+      )
       if (alg !== key.alg) {
         throw new Error(
           `cose-ts: Encrypt0Message.toBytes: alg mismatch, expected ${alg}, got ${key.alg}`
@@ -120,6 +131,8 @@ export class Encrypt0Message {
         this.unprotected.setParam(iana.HeaderParameterKid, key.kid)
       }
     }
+
+    assertIVParams(this.protected, this.unprotected, 'toBytes')
 
     const ivSize = key.nonceSize()
     // TODO: support partial iv
@@ -141,5 +154,33 @@ export class Encrypt0Message {
     )
 
     return encodeCBOR([protectedBytes, this.unprotected.toRaw(), ciphertext])
+  }
+}
+
+// assertIVParams enforces the IV rules from RFC 9052 §3.1: the full IV and the
+// Partial IV header parameters MUST NOT both be present in the same layer.
+// Partial IV is not supported yet, so its presence is rejected outright.
+function assertIVParams(
+  protectedHeader: Header,
+  unprotectedHeader: Header,
+  fn: string
+): void {
+  const hasIV =
+    protectedHeader.has(iana.HeaderParameterIV) ||
+    unprotectedHeader.has(iana.HeaderParameterIV)
+  const hasPartialIV =
+    protectedHeader.has(iana.HeaderParameterPartialIV) ||
+    unprotectedHeader.has(iana.HeaderParameterPartialIV)
+
+  if (hasIV && hasPartialIV) {
+    throw new Error(
+      `cose-ts: Encrypt0Message.${fn}: IV and Partial IV must not both be present`
+    )
+  }
+
+  if (hasPartialIV) {
+    throw new Error(
+      `cose-ts: Encrypt0Message.${fn}: Partial IV is not supported`
+    )
   }
 }

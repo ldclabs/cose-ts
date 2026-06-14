@@ -30,6 +30,11 @@
       "browser": "./dist/aesgcm.js",
       "default": "./dist/aesgcm.js"
     },
+    "./aeskw": {
+      "types": "./dist/aeskw.d.ts",
+      "browser": "./dist/aeskw.js",
+      "default": "./dist/aeskw.js"
+    },
     "./chacha20poly1305": {
       "types": "./dist/chacha20poly1305.d.ts",
       "browser": "./dist/chacha20poly1305.js",
@@ -54,6 +59,11 @@
       "types": "./dist/ed25519.d.ts",
       "browser": "./dist/ed25519.js",
       "default": "./dist/ed25519.js"
+    },
+    "./encrypt": {
+      "types": "./dist/encrypt.d.ts",
+      "browser": "./dist/encrypt.js",
+      "default": "./dist/encrypt.js"
     },
     "./encrypt0": {
       "types": "./dist/encrypt0.d.ts",
@@ -95,15 +105,35 @@
       "browser": "./dist/key.js",
       "default": "./dist/key.js"
     },
+    "./keyset": {
+      "types": "./dist/keyset.d.ts",
+      "browser": "./dist/keyset.js",
+      "default": "./dist/keyset.js"
+    },
+    "./mac": {
+      "types": "./dist/mac.d.ts",
+      "browser": "./dist/mac.js",
+      "default": "./dist/mac.js"
+    },
     "./mac0": {
       "types": "./dist/mac0.d.ts",
       "browser": "./dist/mac0.js",
       "default": "./dist/mac0.js"
     },
+    "./sign": {
+      "types": "./dist/sign.d.ts",
+      "browser": "./dist/sign.js",
+      "default": "./dist/sign.js"
+    },
     "./map": {
       "types": "./dist/map.d.ts",
       "browser": "./dist/map.js",
       "default": "./dist/map.js"
+    },
+    "./recipient": {
+      "types": "./dist/recipient.d.ts",
+      "browser": "./dist/recipient.js",
+      "default": "./dist/recipient.js"
     },
     "./sign1": {
       "types": "./dist/sign1.d.ts",

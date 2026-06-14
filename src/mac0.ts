@@ -1,8 +1,8 @@
 // (c) 2023-present, LDC Labs. All rights reserved.
 // See the file LICENSE for licensing terms.
 
-import { Header } from './header'
-import { RawMap } from './map'
+import { Header, verifyHeaders } from './header'
+import { RawMap, assertIntOrText } from './map'
 import { Key, type MACer } from './key'
 import * as iana from './iana'
 import { decodeCBOR, encodeCBOR, equalBytes } from './utils'
@@ -16,7 +16,7 @@ import {
 
 // Mac0Message represents a COSE_Mac0 object.
 //
-// Reference https://datatracker.ietf.org/doc/html/rfc9052#name-signing-with-one-signer.
+// Reference https://datatracker.ietf.org/doc/html/rfc9052#name-maced-messages-with-implici.
 export class Mac0Message {
   payload: Uint8Array
   // protected header parameters: iana.HeaderParameterAlg, iana.HeaderParameterCrit.
@@ -55,8 +55,13 @@ export class Mac0Message {
     ]
     const protectedHeader = Header.fromBytes(protectedBytes)
     const unprotectedHeader = new Header(unprotected)
+    verifyHeaders(protectedHeader, unprotectedHeader)
     if (protectedHeader.has(iana.HeaderParameterAlg)) {
-      const alg = protectedHeader.getInt(iana.HeaderParameterAlg)
+      const alg = protectedHeader.getType(
+        iana.HeaderParameterAlg,
+        assertIntOrText,
+        'alg'
+      )
       if (alg !== key.alg) {
         throw new Error(
           `cose-ts: Mac0Message.fromBytes: alg mismatch, expected ${alg}, got ${key.alg}`
@@ -97,7 +102,11 @@ export class Mac0Message {
         this.protected.setParam(iana.HeaderParameterAlg, key.alg)
       }
     } else if (this.protected.has(iana.HeaderParameterAlg)) {
-      const alg = this.protected.getInt(iana.HeaderParameterAlg)
+      const alg = this.protected.getType(
+        iana.HeaderParameterAlg,
+        assertIntOrText,
+        'alg'
+      )
       if (alg !== key.alg) {
         throw new Error(
           `cose-ts: Mac0Message.toBytes: alg mismatch, expected ${alg}, got ${key.alg}`

@@ -54,6 +54,7 @@ export class ChaCha20Poly1305Key extends Key implements Encryptor {
     nonce: Uint8Array,
     aad?: Uint8Array
   ): Promise<Uint8Array> {
+    this.verifyOps(iana.KeyOperationEncrypt)
     const cipher = chacha20poly1305(this.getSecretKey(), nonce, aad)
     return Promise.resolve(cipher.encrypt(plaintext))
   }
@@ -63,6 +64,7 @@ export class ChaCha20Poly1305Key extends Key implements Encryptor {
     nonce: Uint8Array,
     aad?: Uint8Array
   ): Promise<Uint8Array> {
+    this.verifyOps(iana.KeyOperationDecrypt)
     const cipher = chacha20poly1305(this.getSecretKey(), nonce, aad)
     return Promise.resolve(cipher.decrypt(ciphertext))
   }

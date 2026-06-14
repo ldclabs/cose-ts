@@ -48,6 +48,9 @@ export class HMACKey extends Key implements MACer {
   }
 
   mac(message: Uint8Array): Uint8Array {
+    // The same primitive is used both to create and to verify a tag, so accept
+    // a key authorized for either MAC operation.
+    this.verifyOps(iana.KeyOperationMacCreate, iana.KeyOperationMacVerify)
     const hash = getHash(this.alg as number)
     const tag = hmac(hash, this.getSecretKey(), message)
     return tag.subarray(0, getTagSize(this.alg as number))

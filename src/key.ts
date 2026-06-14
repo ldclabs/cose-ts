@@ -23,6 +23,11 @@ export interface MACer {
   mac(message: Uint8Array): Uint8Array
 }
 
+export interface KeyWrapper {
+  wrapKey(cek: Uint8Array): Uint8Array
+  unwrapKey(wrapped: Uint8Array): Uint8Array
+}
+
 export interface Signer {
   sign(message: Uint8Array): Uint8Array
 }
@@ -113,5 +118,28 @@ export class Key extends KVMap {
       default:
         throw new Error('unsupported key type')
     }
+  }
+
+  // verifyOps enforces the key_ops usage restriction defined in RFC 9052 §7.1.
+  // If the key restricts its operations via the key_ops parameter, at least one
+  // of the allowed operations MUST be present; otherwise the key MUST NOT be
+  // used for that operation. Keys without key_ops are unrestricted.
+  verifyOps(...allowed: (number | string)[]): void {
+    if (!this.has(iana.KeyParameterKeyOps)) {
+      return
+    }
+
+    const ops = this.ops
+    for (const op of allowed) {
+      if (ops.includes(op)) {
+        return
+      }
+    }
+
+    throw new Error(
+      `cose-ts: key_ops ${JSON.stringify(
+        ops
+      )} does not permit operation ${allowed.join('/')}`
+    )
   }
 }

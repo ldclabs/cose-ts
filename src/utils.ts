@@ -2,6 +2,10 @@
 // See the file LICENSE for licensing terms.
 
 import { decode, encode, Token } from 'cborg'
+import {
+  concatBytes as nobleConcatBytes,
+  utf8ToBytes as nobleUtf8ToBytes
+} from '@noble/hashes/utils'
 
 export {
   bytesToHex,
@@ -93,6 +97,59 @@ export function assertEqual(
 
 type TokenEx = Token & { _keyBytes?: Uint8Array }
 
+// cborHead encodes a CBOR head (major type + minimal-length argument).
+function cborHead(major: number, n: number): Uint8Array {
+  const mt = major << 5
+  if (n < 24) {
+    return new Uint8Array([mt | n])
+  }
+  if (n < 0x100) {
+    return new Uint8Array([mt | 24, n])
+  }
+  if (n < 0x10000) {
+    return new Uint8Array([mt | 25, n >> 8, n & 0xff])
+  }
+  if (n < 0x100000000) {
+    return new Uint8Array([
+      mt | 26,
+      (n >>> 24) & 0xff,
+      (n >>> 16) & 0xff,
+      (n >>> 8) & 0xff,
+      n & 0xff
+    ])
+  }
+  // 64-bit argument; map labels never reach this range in practice.
+  const hi = Math.floor(n / 0x100000000)
+  const lo = n >>> 0
+  return new Uint8Array([
+    mt | 27,
+    (hi >>> 24) & 0xff,
+    (hi >>> 16) & 0xff,
+    (hi >>> 8) & 0xff,
+    hi & 0xff,
+    (lo >>> 24) & 0xff,
+    (lo >>> 16) & 0xff,
+    (lo >>> 8) & 0xff,
+    lo & 0xff
+  ])
+}
+
+// cborKeyBytes returns the deterministic CBOR encoding of a map key (an integer
+// or text-string label). It deliberately does NOT call encodeCBOR(): the map
+// sorter runs inside cborg's own encode(), and re-entering encode() there
+// corrupts cborg's shared encoding state (dropping the enclosing array header
+// for maps with 4 or more entries). The head bytes are produced directly here.
+function cborKeyBytes(value: unknown): Uint8Array {
+  if (typeof value === 'number' && Number.isInteger(value)) {
+    return value >= 0 ? cborHead(0, value) : cborHead(1, -value - 1)
+  }
+  if (typeof value === 'string') {
+    const b = nobleUtf8ToBytes(value)
+    return nobleConcatBytes(cborHead(3, b.length), b)
+  }
+  throw new Error('rfc8949MapSorter: complex key types are not supported yet')
+}
+
 function rfc8949MapSorter(
   e1: (Token | Token[])[],
   e2: (Token | Token[])[]
@@ -103,11 +160,11 @@ function rfc8949MapSorter(
 
     // different key types
     if (!t1._keyBytes) {
-      t1._keyBytes = encodeCBOR(t1.value)
+      t1._keyBytes = cborKeyBytes(t1.value)
     }
 
     if (!t2._keyBytes) {
-      t2._keyBytes = encodeCBOR(t2.value)
+      t2._keyBytes = cborKeyBytes(t2.value)
     }
 
     return compareBytes(t1._keyBytes, t2._keyBytes)

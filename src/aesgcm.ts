@@ -49,6 +49,7 @@ export class AesGcmKey extends Key implements Encryptor {
     nonce: Uint8Array,
     aad?: Uint8Array
   ): Promise<Uint8Array> {
+    this.verifyOps(iana.KeyOperationEncrypt)
     const cipher = gcm(this.getSecretKey(), nonce, aad)
     return cipher.encrypt(plaintext)
   }
@@ -58,6 +59,7 @@ export class AesGcmKey extends Key implements Encryptor {
     nonce: Uint8Array,
     aad?: Uint8Array
   ): Promise<Uint8Array> {
+    this.verifyOps(iana.KeyOperationDecrypt)
     const cipher = gcm(this.getSecretKey(), nonce, aad)
     return cipher.decrypt(ciphertext)
   }

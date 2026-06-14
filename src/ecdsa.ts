@@ -167,6 +167,7 @@ export class ECDSAKey extends Key implements Signer, Verifier {
   }
 
   sign(message: Uint8Array): Uint8Array {
+    this.verifyOps(iana.KeyOperationSign)
     const curve = getCurve(this.alg)
     const sig = curve.sign(message, this.getSecretKey(), {
       prehash: true
@@ -175,6 +176,7 @@ export class ECDSAKey extends Key implements Signer, Verifier {
   }
 
   verify(message: Uint8Array, signature: Uint8Array): boolean {
+    this.verifyOps(iana.KeyOperationVerify)
     const curve = getCurve(this.alg)
     return curve.verify(signature, message, this.getPublicKey(), {
       prehash: true

@@ -87,10 +87,12 @@ export class Ed25519Key extends Key implements Signer, Verifier {
   }
 
   sign(message: Uint8Array): Uint8Array {
+    this.verifyOps(iana.KeyOperationSign)
     return ed25519.sign(message, this.getSecretKey())
   }
 
   verify(message: Uint8Array, signature: Uint8Array): boolean {
+    this.verifyOps(iana.KeyOperationVerify)
     return ed25519.verify(signature, message, this.getPublicKey())
   }
 }

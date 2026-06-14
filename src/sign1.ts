@@ -1,8 +1,8 @@
 // (c) 2023-present, LDC Labs. All rights reserved.
 // See the file LICENSE for licensing terms.
 
-import { Header } from './header'
-import { RawMap } from './map'
+import { Header, verifyHeaders } from './header'
+import { RawMap, assertIntOrText } from './map'
 import { Key, type Verifier, Signer } from './key'
 import * as iana from './iana'
 import { decodeCBOR, encodeCBOR } from './utils'
@@ -50,8 +50,13 @@ export class Sign1Message {
     ) as [Uint8Array, RawMap, Uint8Array, Uint8Array]
     const protectedHeader = Header.fromBytes(protectedBytes)
     const unprotectedHeader = new Header(unprotected)
+    verifyHeaders(protectedHeader, unprotectedHeader)
     if (protectedHeader.has(iana.HeaderParameterAlg)) {
-      const alg = protectedHeader.getInt(iana.HeaderParameterAlg)
+      const alg = protectedHeader.getType(
+        iana.HeaderParameterAlg,
+        assertIntOrText,
+        'alg'
+      )
       if (alg !== key.alg) {
         throw new Error(
           `cose-ts: Sign1Message.fromBytes: alg mismatch, expected ${alg}, got ${key.alg}`
@@ -94,7 +99,11 @@ export class Sign1Message {
         this.protected.setParam(iana.HeaderParameterAlg, key.alg)
       }
     } else if (this.protected.has(iana.HeaderParameterAlg)) {
-      const alg = this.protected.getInt(iana.HeaderParameterAlg)
+      const alg = this.protected.getType(
+        iana.HeaderParameterAlg,
+        assertIntOrText,
+        'alg'
+      )
       if (alg !== key.alg) {
         throw new Error(
           `cose-ts: Sign1Message.toBytes: alg mismatch, expected ${alg}, got ${key.alg}`
