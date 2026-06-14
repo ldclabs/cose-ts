@@ -5,7 +5,7 @@ import { Header } from './header'
 import { RawMap } from './map'
 import { Key, type MACer } from './key'
 import * as iana from './iana'
-import { decodeCBOR, encodeCBOR, compareBytes } from './utils'
+import { decodeCBOR, encodeCBOR, equalBytes } from './utils'
 import {
   skipTag,
   withTag,
@@ -67,7 +67,7 @@ export class Mac0Message {
     const t = key.mac(
       Mac0Message.macBytes(payload, protectedBytes, externalData)
     )
-    if (compareBytes(tag, t) !== 0) {
+    if (!equalBytes(tag, t)) {
       throw new Error('cose-ts: Mac0Message.fromBytes: tag mismatch')
     }
 

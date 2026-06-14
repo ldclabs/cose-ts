@@ -100,7 +100,7 @@ export class ECDSAKey extends Key implements Signer, Verifier {
 
   set alg(alg: number) {
     super.alg = alg
-    this.setParam(iana.OKPKeyParameterCrv, getCrv(alg))
+    this.setParam(iana.EC2KeyParameterCrv, getCrv(alg))
   }
 
   getSecretKey(): Uint8Array {

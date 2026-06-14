@@ -7,6 +7,7 @@ import {
   bytesToBase64,
   bytesToBase64Url,
   compareBytes,
+  equalBytes,
   randomBytes
 } from './utils'
 
@@ -52,5 +53,34 @@ describe('utils', () => {
       assert.equal(compareBytes(base64ToBytes(v1), b), 0)
       assert.equal(compareBytes(base64ToBytes(v2), b), 0)
     }
+  })
+
+  it('bytesToBase64 handles large inputs without stack overflow', () => {
+    const b = new Uint8Array(200_000)
+    for (let i = 0; i < b.length; i++) {
+      b[i] = i % 256
+    }
+    assert.equal(compareBytes(base64ToBytes(bytesToBase64(b)), b), 0)
+    assert.equal(compareBytes(base64ToBytes(bytesToBase64Url(b)), b), 0)
+  })
+
+  it('equalBytes', () => {
+    assert.equal(equalBytes(new Uint8Array(), new Uint8Array()), true)
+    assert.equal(
+      equalBytes(new Uint8Array([1, 2, 3]), new Uint8Array([1, 2, 3])),
+      true
+    )
+    assert.equal(
+      equalBytes(new Uint8Array([1, 2, 3]), new Uint8Array([1, 2, 4])),
+      false
+    )
+    assert.equal(
+      equalBytes(new Uint8Array([1, 2, 3]), new Uint8Array([1, 2])),
+      false
+    )
+    assert.equal(
+      equalBytes(new Uint8Array([1, 2]), new Uint8Array([1, 2, 3])),
+      false
+    )
   })
 })

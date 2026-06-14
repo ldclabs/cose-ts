@@ -2,14 +2,21 @@
 // See the file LICENSE for licensing terms.
 
 import { assert, describe, it } from 'vitest'
-import { utf8ToBytes, randomBytes, compareBytes } from './utils'
-import { Validator, Claims, withCWTTag } from './cwt'
+import { Claims, Validator, withCWTTag } from './cwt'
 import { Ed25519Key } from './ed25519'
 import { Sign1Message } from './sign1'
+import {
+  bytesToBase64Url,
+  compareBytes,
+  randomBytes,
+  utf8ToBytes
+} from './utils'
 
 describe('CWT', () => {
   it('with Sign1Message and Ed25519 Key', () => {
     const key = Ed25519Key.generate()
+    const sk = bytesToBase64Url(key.getSecretKey())
+    console.log('Ed25519 Private Key (base64url):', sk)
     const pubKey = key.public()
 
     const claims = new Claims()

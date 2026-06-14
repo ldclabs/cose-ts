@@ -13,11 +13,18 @@ export {
 } from '@noble/hashes/utils'
 
 export function bytesToBase64(bytes: Uint8Array): string {
-  return btoa(String.fromCharCode(...bytes))
+  // Build the binary string in chunks to avoid "Maximum call stack size
+  // exceeded" that `String.fromCharCode(...bytes)` triggers on large inputs.
+  let binary = ''
+  const chunkSize = 0x8000 // 32 KiB, well under the argument-count limit
+  for (let i = 0; i < bytes.length; i += chunkSize) {
+    binary += String.fromCharCode(...bytes.subarray(i, i + chunkSize))
+  }
+  return btoa(binary)
 }
 
 export function bytesToBase64Url(bytes: Uint8Array): string {
-  return btoa(String.fromCharCode(...bytes))
+  return bytesToBase64(bytes)
     .replaceAll('+', '-')
     .replaceAll('/', '_')
     .replaceAll('=', '')
@@ -52,6 +59,26 @@ export function compareBytes(a: Uint8Array, b: Uint8Array): number {
   }
 
   throw new Error('cose-ts: compareBytes: invalid arguments')
+}
+
+// equalBytes reports whether two Uint8Array have the same contents, comparing
+// in constant time with respect to the byte values (timing still depends on
+// the length). Use this instead of compareBytes when comparing secret-derived
+// values such as MAC tags to avoid leaking information through early exits.
+export function equalBytes(a: Uint8Array, b: Uint8Array): boolean {
+  if (!(a instanceof Uint8Array) || !(b instanceof Uint8Array)) {
+    throw new Error('cose-ts: equalBytes: invalid arguments')
+  }
+
+  if (a.length !== b.length) {
+    return false
+  }
+
+  let diff = 0
+  for (let i = 0; i < a.length; i++) {
+    diff |= a[i] ^ b[i]
+  }
+  return diff === 0
 }
 
 export function assertEqual(
