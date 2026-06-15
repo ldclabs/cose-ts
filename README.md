@@ -6,8 +6,8 @@
 
 _A TypeScript library for the [CBOR Object Signing and Encryption (COSE)][cose-spec] and [CBOR Web Token (CWT)][cwt-spec]._
 
-- Golang version: [https://github.com/ldclabs/cose](https://github.com/ldclabs/cose)
 - Rust version: [https://github.com/ldclabs/cose2](https://github.com/ldclabs/cose2)
+- Golang version: [https://github.com/ldclabs/cose](https://github.com/ldclabs/cose)
 
 ## Install
 
