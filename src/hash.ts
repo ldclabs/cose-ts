@@ -1,10 +1,10 @@
-import { sha256, sha384, sha512 } from '@noble/hashes/sha2'
-import { CHash } from '@noble/hashes/utils'
+import { sha256, sha384, sha512 } from '@noble/hashes/sha2.js'
+import { CHash } from '@noble/hashes/utils.js'
 import * as iana from './iana'
 
-export { hmac } from '@noble/hashes/hmac'
-export { sha256, sha384, sha512 } from '@noble/hashes/sha2'
-export { sha3_256, sha3_384, sha3_512 } from '@noble/hashes/sha3'
+export { hmac } from '@noble/hashes/hmac.js'
+export { sha256, sha384, sha512 } from '@noble/hashes/sha2.js'
+export { sha3_256, sha3_384, sha3_512 } from '@noble/hashes/sha3.js'
 
 export function getHash(alg: number): CHash {
   switch (alg) {

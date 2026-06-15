@@ -16,6 +16,9 @@ import {
 
 // Sign1Message represents a COSE_Sign1 object.
 //
+// The optional externalData argument on toBytes()/fromBytes() is included in
+// the Sig_structure and must match exactly on signing and verification.
+//
 // Reference https://datatracker.ietf.org/doc/html/rfc9052#name-signing-with-one-signer
 export class Sign1Message {
   payload: Uint8Array
@@ -87,9 +90,9 @@ export class Sign1Message {
   ) {
     this.payload = payload
     this.protected = protectedHeader
-      ? new Header(protectedHeader.toRaw())
+      ? new Header(protectedHeader.clone())
       : null
-    this.unprotected = unprotected ? new Header(unprotected.toRaw()) : null
+    this.unprotected = unprotected ? new Header(unprotected.clone()) : null
   }
 
   toBytes(key: Key & Signer, externalData?: Uint8Array): Uint8Array {
@@ -117,6 +120,8 @@ export class Sign1Message {
         this.unprotected.setParam(iana.HeaderParameterKid, key.kid)
       }
     }
+
+    verifyHeaders(this.protected, this.unprotected)
 
     const protectedBytes = this.protected.toBytes()
     const sig = key.sign(

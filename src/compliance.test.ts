@@ -31,11 +31,7 @@ describe('RFC 9052 compliance', () => {
         // crit references content type (3), but it is not in the bucket.
         .setParam(iana.HeaderParameterCrit, [iana.HeaderParameterContentType])
     )
-    const output = msg.toBytes(key)
-    assert.throw(
-      () => Sign1Message.fromBytes(key, output),
-      /critical header parameter/
-    )
+    assert.throw(() => msg.toBytes(key), /critical header parameter/)
   })
 
   it('crit: accepts a critical label present in the protected bucket', () => {
@@ -60,11 +56,7 @@ describe('RFC 9052 compliance', () => {
         .setParam(iana.HeaderParameterAlg, iana.AlgorithmES256)
         .setParam(iana.HeaderParameterCrit, [])
     )
-    const output = msg.toBytes(key)
-    assert.throw(
-      () => Sign1Message.fromBytes(key, output),
-      /at least one value/
-    )
+    assert.throw(() => msg.toBytes(key), /at least one value/)
   })
 
   it('headers: rejects a label present in both buckets', () => {
@@ -75,11 +67,7 @@ describe('RFC 9052 compliance', () => {
       // alg duplicated in the unprotected bucket.
       new Header().setParam(iana.HeaderParameterAlg, iana.AlgorithmES256)
     )
-    const output = msg.toBytes(key)
-    assert.throw(
-      () => Sign1Message.fromBytes(key, output),
-      /both the protected and unprotected/
-    )
+    assert.throw(() => msg.toBytes(key), /both the protected and unprotected/)
   })
 
   it('alg: a text-string alg yields a clean mismatch, not a TypeError', () => {

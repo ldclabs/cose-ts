@@ -1,11 +1,11 @@
 // (c) 2023-present, LDC Labs. All rights reserved.
 // See the file LICENSE for licensing terms.
 
-import { ed25519 } from '@noble/curves/ed25519'
+import { ed25519 } from '@noble/curves/ed25519.js'
 import * as iana from './iana'
-import { RawMap, assertBytes } from './map'
 import { Key, type Signer, Verifier } from './key'
-import { randomBytes, decodeCBOR } from './utils'
+import { RawMap, assertBytes } from './map'
+import { decodeCBOR, randomBytes } from './utils'
 
 // TODO: more checks
 // Ed25519Key implements signature algorithm Ed25519 for COSE as defined in RFC9053.

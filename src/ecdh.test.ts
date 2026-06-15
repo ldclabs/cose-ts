@@ -22,6 +22,14 @@ describe('ECDH Examples', () => {
     }
   })
 
+  it('public() handles compressed public keys with an even y coordinate', () => {
+    const secret = new Uint8Array(32)
+    secret[31] = 3
+    const key = ECDHKey.fromSecret(iana.EllipticCurveP_256, secret)
+    const publicKey = key.public()
+    assert.equal(publicKey.getBool(iana.EC2KeyParameterY), false)
+  })
+
   it('Examples', () => {
     const keyR = new Map()
     keyR.set(iana.KeyParameterKty, iana.KeyTypeEC2)

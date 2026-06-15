@@ -38,4 +38,19 @@ describe('ECDSAKey Examples', () => {
       assert.equal(pk2.verify(utf8ToBytes('This is the content.'), sig2), true)
     }
   })
+
+  it('imports compressed public keys with an odd y coordinate', () => {
+    const secret = new Uint8Array(32)
+    secret[31] = 1
+    const key = ECDSAKey.fromSecret(secret)
+    const publicKey = key.getPublicKey()
+    assert.equal(publicKey[0], 0x03)
+
+    const parsed = ECDSAKey.fromPublic(publicKey)
+    assert.equal(parsed.getBool(iana.EC2KeyParameterY), true)
+    assert.deepEqual(
+      parsed.getBytes(iana.EC2KeyParameterX),
+      publicKey.subarray(1)
+    )
+  })
 })

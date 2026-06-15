@@ -5,7 +5,14 @@ import { encodeCBOR, decodeCBOR } from './utils'
 
 export type Label = number | string
 
-export type Value = number | string | Uint8Array | boolean | Value[] | RawMap
+export type Value =
+  | number
+  | string
+  | Uint8Array
+  | boolean
+  | null
+  | Value[]
+  | RawMap
 
 export type RawMap = Map<Label, Value>
 

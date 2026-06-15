@@ -17,6 +17,10 @@ import {
 
 // Encrypt0Message represents a COSE_Encrypt0 object.
 //
+// Use this structure when the recipient already knows the content encryption
+// key. The protected header bytes and optional externalData are authenticated
+// as AEAD additional data.
+//
 // Reference https://datatracker.ietf.org/doc/html/rfc9052#name-single-recipient-encrypted.
 export class Encrypt0Message {
   payload: Uint8Array
@@ -98,9 +102,9 @@ export class Encrypt0Message {
   ) {
     this.payload = payload
     this.protected = protectedHeader
-      ? new Header(protectedHeader.toRaw())
+      ? new Header(protectedHeader.clone())
       : null
-    this.unprotected = unprotected ? new Header(unprotected.toRaw()) : null
+    this.unprotected = unprotected ? new Header(unprotected.clone()) : null
   }
 
   async toBytes(
@@ -132,6 +136,7 @@ export class Encrypt0Message {
       }
     }
 
+    verifyHeaders(this.protected, this.unprotected)
     assertIVParams(this.protected, this.unprotected, 'toBytes')
 
     const ivSize = key.nonceSize()
@@ -165,18 +170,9 @@ function assertIVParams(
   unprotectedHeader: Header,
   fn: string
 ): void {
-  const hasIV =
-    protectedHeader.has(iana.HeaderParameterIV) ||
-    unprotectedHeader.has(iana.HeaderParameterIV)
   const hasPartialIV =
     protectedHeader.has(iana.HeaderParameterPartialIV) ||
     unprotectedHeader.has(iana.HeaderParameterPartialIV)
-
-  if (hasIV && hasPartialIV) {
-    throw new Error(
-      `cose-ts: Encrypt0Message.${fn}: IV and Partial IV must not both be present`
-    )
-  }
 
   if (hasPartialIV) {
     throw new Error(

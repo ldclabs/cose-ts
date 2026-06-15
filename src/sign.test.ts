@@ -3,7 +3,13 @@
 
 import { assert, describe, it } from 'vitest'
 import * as iana from './iana'
-import { base64ToBytes, bytesToHex, utf8ToBytes } from './utils'
+import {
+  base64ToBytes,
+  bytesToHex,
+  hexToBytes,
+  utf8ToBytes,
+  encodeCBOR
+} from './utils'
 import { Header } from './header'
 import { ECDSAKey } from './ecdsa'
 import { Ed25519Key } from './ed25519'
@@ -36,6 +42,66 @@ describe('SignMessage', () => {
     const msg2 = SignMessage.fromBytes([key], output)
     assert.deepEqual(msg2.payload, payload)
     assert.equal(msg2.signatures.length, 1)
+  })
+
+  // RFC 9052 Appendix C.1.2: Multiple Signers (ECDSA P-256 + ECDSA P-521).
+  // The P-521 example was generated with a non-deterministic nonce, so its
+  // signature cannot be reproduced; instead we verify the authoritative RFC
+  // bytes, exercising the multi-signer / multi-algorithm verification path.
+  it('C.1.2: verifies the RFC multi-signer test vector', () => {
+    const key256 = ECDSAKey.fromSecret(
+      hexToBytes(
+        '57c92077664146e876760c9520d054aa93c3afb04e306705db6090308507b4d3'
+      )
+    )
+    const key521 = ECDSAKey.fromSecret(
+      hexToBytes(
+        '00085138ddabf5ca975f5860f91a08e91d6d5f9a76ad4018766a476680b55cd3' +
+          '39e8ab6c72b5facdb2a2a50ac25bd086647dd3e2e6e99e84ca2c3609fdf177feb26d'
+      )
+    )
+
+    const sig256 = hexToBytes(
+      'e2aeafd40d69d19dfe6e52077c5d7ff4e408282cbefb5d06cbf414af2e19d982' +
+        'ac45ac98b8544c908b4507de1e90b717c3d34816fe926a2b98f53afd2fa0f30a'
+    )
+    const sig521 = hexToBytes(
+      '00a2d28a7c2bdb1587877420f65adf7d0b9a06635dd1de64bb62974c863f0b160' +
+        'dd2163734034e6ac003b01e8705524c5c4ca479a952f0247ee8cb0b4fb7397ba0' +
+        '8d009e0c8bf482270cc5771aa143966e5a469a09f613488030c5b07ec6d722e38' +
+        '35adb5b2d8c44e95ffb13877dd2582866883535de3bb03d01753f83ab87bb4f7a' +
+        '0297'
+    )
+
+    const message = encodeCBOR([
+      new Uint8Array(),
+      new Map(),
+      payload,
+      [
+        [
+          hexToBytes('a10126'),
+          new Map([[iana.HeaderParameterKid, utf8ToBytes('11')]]),
+          sig256
+        ],
+        [
+          hexToBytes('a1013823'),
+          new Map([
+            [
+              iana.HeaderParameterKid,
+              utf8ToBytes('bilbo.baggins@hobbiton.example')
+            ]
+          ]),
+          sig521
+        ]
+      ]
+    ])
+
+    const verified = SignMessage.fromBytes(
+      [key256.public(), key521.public()],
+      message
+    )
+    assert.deepEqual(verified.payload, payload)
+    assert.equal(verified.signatures.length, 2)
   })
 
   it('round-trips a message with two signers', () => {

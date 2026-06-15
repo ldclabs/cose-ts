@@ -1,11 +1,11 @@
 // (c) 2023-present, LDC Labs. All rights reserved.
 // See the file LICENSE for licensing terms.
 
-import { chacha20poly1305 } from '@noble/ciphers/chacha'
+import { chacha20poly1305 } from '@noble/ciphers/chacha.js'
 import * as iana from './iana'
-import { RawMap, assertBytes } from './map'
 import { Key, type Encryptor } from './key'
-import { randomBytes, decodeCBOR } from './utils'
+import { RawMap, assertBytes } from './map'
+import { decodeCBOR, randomBytes } from './utils'
 
 // TODO: more checks
 // ChaCha20Poly1305Key implements content encryption algorithm ChaCha20/Poly1305 for COSE as defined in RFC9053.

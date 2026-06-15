@@ -1,12 +1,10 @@
 // (c) 2023-present, LDC Labs. All rights reserved.
 // See the file LICENSE for licensing terms.
 
-import { CurveFn as XCurveFn } from '@noble/curves/abstract/montgomery'
-import { CurveFn } from '@noble/curves/abstract/weierstrass'
-import { x25519 } from '@noble/curves/ed25519'
-import { p256 } from '@noble/curves/p256'
-import { p384 } from '@noble/curves/p384'
-import { p521 } from '@noble/curves/p521'
+import { type MontgomeryECDH } from '@noble/curves/abstract/montgomery.js'
+import { type ECDSA } from '@noble/curves/abstract/weierstrass.js'
+import { x25519 } from '@noble/curves/ed25519.js'
+import { p256, p384, p521 } from '@noble/curves/nist.js'
 import * as iana from './iana'
 import { Key, type ECDHer } from './key'
 import { RawMap, assertBytes, assertInt } from './map'
@@ -22,7 +20,7 @@ export class ECDHKey extends Key implements ECDHer {
 
   static generate<T>(crv: number, kid?: T): ECDHKey {
     const curve = getCurve(crv)
-    return ECDHKey.fromSecret(crv, curve.utils.randomPrivateKey(), kid)
+    return ECDHKey.fromSecret(crv, curve.utils.randomSecretKey(), kid)
   }
 
   static fromSecret<T>(crv: number, secret: Uint8Array, kid?: T): ECDHKey {
@@ -36,7 +34,7 @@ export class ECDHKey extends Key implements ECDHer {
         )
       }
     } else {
-      if (!(curve as CurveFn).utils.isValidPrivateKey(secret)) {
+      if (!(curve as ECDSA).utils.isValidSecretKey(secret)) {
         throw new Error(
           `cose-ts: ECDSAKey.fromSecret: secret is not a valid private key for ECDH curve ${crv}`
         )
@@ -63,8 +61,8 @@ export class ECDHKey extends Key implements ECDHer {
       }
       key.setParam(iana.EC2KeyParameterX, pubkey)
     } else {
-      const crv = curve as CurveFn
-      crv.ProjectivePoint.fromHex(pubkey) // validate public key
+      const crv = curve as ECDSA
+      crv.Point.fromBytes(pubkey) // validate public key
       switch (pubkey[0]) {
         case 0x02:
           key.setParam(iana.EC2KeyParameterY, false)
@@ -77,11 +75,11 @@ export class ECDHKey extends Key implements ECDHer {
         case 0x04:
           key.setParam(
             iana.EC2KeyParameterX,
-            pubkey.subarray(1, crv.CURVE.Fp.BYTES + 1)
+            pubkey.subarray(1, crv.Point.Fp.BYTES + 1)
           )
           key.setParam(
             iana.EC2KeyParameterY,
-            pubkey.subarray(crv.CURVE.Fp.BYTES + 1)
+            pubkey.subarray(crv.Point.Fp.BYTES + 1)
           )
           break
         default:
@@ -132,7 +130,7 @@ export class ECDHKey extends Key implements ECDHer {
       return x25519.getSharedSecret(priv, pub)
     }
 
-    const secret = (curve as CurveFn).getSharedSecret(priv, pub, true)
+    const secret = (curve as ECDSA).getSharedSecret(priv, pub, true)
     const size = getKeySize(crv)
     return secret.byteLength === size ? secret : secret.subarray(1)
   }
@@ -168,7 +166,7 @@ export class ECDHKey extends Key implements ECDHer {
     if (curve === x25519) {
       return curve.getPublicKey(this.getSecretKey())
     } else {
-      return (curve as CurveFn).getPublicKey(this.getSecretKey(), true)
+      return (curve as ECDSA).getPublicKey(this.getSecretKey(), true)
     }
   }
 
@@ -180,7 +178,7 @@ export class ECDHKey extends Key implements ECDHer {
       if (curve === x25519) {
         key.setParam(iana.EC2KeyParameterX, pk)
       } else {
-        curve = curve as CurveFn
+        curve = curve as ECDSA
         switch (pk[0]) {
           case 0x02:
             key.setParam(iana.EC2KeyParameterY, false)
@@ -193,11 +191,11 @@ export class ECDHKey extends Key implements ECDHer {
           case 0x04:
             key.setParam(
               iana.EC2KeyParameterX,
-              pk.subarray(1, curve.CURVE.Fp.BYTES + 1)
+              pk.subarray(1, curve.Point.Fp.BYTES + 1)
             )
             key.setParam(
               iana.EC2KeyParameterY,
-              pk.subarray(curve.CURVE.Fp.BYTES + 1)
+              pk.subarray(curve.Point.Fp.BYTES + 1)
             )
             break
         }
@@ -214,7 +212,7 @@ export class ECDHKey extends Key implements ECDHer {
   }
 }
 
-export function getCurve(crv: number): CurveFn | XCurveFn {
+export function getCurve(crv: number): ECDSA | MontgomeryECDH {
   switch (crv) {
     case iana.EllipticCurveP_256:
       return p256

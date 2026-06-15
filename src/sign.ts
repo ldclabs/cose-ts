@@ -14,7 +14,10 @@ import {
   CBORSelfPrefix
 } from './tag'
 
-// Signature represents a COSE_Signature structure.
+// Signature represents a COSE_Signature structure inside COSE_Sign.
+//
+// COSE_Sign separates body headers from per-signer headers. The per-signer
+// protected header is included in the Sig_structure for this signature.
 //
 // Reference https://datatracker.ietf.org/doc/html/rfc9052#name-signing-with-one-or-more-si.
 export class Signature {
@@ -24,14 +27,18 @@ export class Signature {
 
   constructor(protectedHeader?: Header, unprotected?: Header) {
     this.protected = protectedHeader
-      ? new Header(protectedHeader.toRaw())
+      ? new Header(protectedHeader.clone())
       : null
-    this.unprotected = unprotected ? new Header(unprotected.toRaw()) : null
+    this.unprotected = unprotected ? new Header(unprotected.clone()) : null
     this.signature = new Uint8Array()
   }
 }
 
 // SignMessage represents a COSE_Sign object, carrying one or more signatures.
+//
+// Use Sign1Message for the common single-signer case. Use this class when a
+// payload needs multiple signatures, potentially with different algorithms or
+// key identifiers.
 //
 // Reference https://datatracker.ietf.org/doc/html/rfc9052#name-signing-with-one-or-more-si.
 export class SignMessage {
@@ -156,9 +163,9 @@ export class SignMessage {
   ) {
     this.payload = payload
     this.protected = protectedHeader
-      ? new Header(protectedHeader.toRaw())
+      ? new Header(protectedHeader.clone())
       : null
-    this.unprotected = unprotected ? new Header(unprotected.toRaw()) : null
+    this.unprotected = unprotected ? new Header(unprotected.clone()) : null
     this.signatures = signatures
   }
 
@@ -179,6 +186,7 @@ export class SignMessage {
     if (this.unprotected == null) {
       this.unprotected = new Header()
     }
+    verifyHeaders(this.protected, this.unprotected)
     const bodyProtected = this.protected.toBytes()
 
     if (this.signatures.length === 0) {
@@ -219,6 +227,8 @@ export class SignMessage {
           sig.unprotected.setParam(iana.HeaderParameterKid, key.kid)
         }
       }
+
+      verifyHeaders(sig.protected, sig.unprotected)
 
       const signProtected = sig.protected.toBytes()
       sig.signature = key.sign(

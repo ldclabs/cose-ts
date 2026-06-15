@@ -16,6 +16,10 @@ import {
 
 // Mac0Message represents a COSE_Mac0 object.
 //
+// Use this structure when the MAC key is known implicitly. The tag covers the
+// protected header bytes, optional externalData, and payload through the RFC
+// 9052 MAC_structure.
+//
 // Reference https://datatracker.ietf.org/doc/html/rfc9052#name-maced-messages-with-implici.
 export class Mac0Message {
   payload: Uint8Array
@@ -90,9 +94,9 @@ export class Mac0Message {
   ) {
     this.payload = payload
     this.protected = protectedHeader
-      ? new Header(protectedHeader.toRaw())
+      ? new Header(protectedHeader.clone())
       : null
-    this.unprotected = unprotected ? new Header(unprotected.toRaw()) : null
+    this.unprotected = unprotected ? new Header(unprotected.clone()) : null
   }
 
   toBytes(key: Key & MACer, externalData?: Uint8Array): Uint8Array {
@@ -120,6 +124,8 @@ export class Mac0Message {
         this.unprotected.setParam(iana.HeaderParameterKid, key.kid)
       }
     }
+
+    verifyHeaders(this.protected, this.unprotected)
 
     const protectedBytes = this.protected.toBytes()
     const tag = key.mac(

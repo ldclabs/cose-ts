@@ -40,7 +40,14 @@ export interface ECDHer {
   ecdh(remotePublic: Key): Uint8Array
 }
 
-// Key implements algorithms and key objects for COSE as defined in RFC9052 and RFC9053.
+// Key is the base COSE_Key map.
+//
+// Algorithm-specific key classes embed the raw COSE_Key parameters in this map
+// and add cryptographic operations such as sign(), verify(), encrypt(), mac(),
+// wrapKey(), or ecdh(). Callers can still access unknown/private COSE_Key
+// labels via the inherited KVMap methods.
+//
+// References:
 // https://datatracker.ietf.org/doc/html/rfc9052#name-key-objects.
 // https://datatracker.ietf.org/doc/html/rfc9053.
 export class Key extends KVMap {
@@ -96,12 +103,14 @@ export class Key extends KVMap {
     this.setParam(iana.KeyParameterBaseIV, assertBytes(iv, 'Base IV'))
   }
 
-  // getKid gets the kid parameter with CBOR decoding.
+  // getKid gets an application-structured kid value that was set with setKid().
+  // Raw COSE kid bytes are available through the kid getter.
   getKid<T>(): T {
     return decodeCBOR(this.getBytes(iana.KeyParameterKid, 'kid'))
   }
 
-  // setKid sets the kid parameter with CBOR encoding.
+  // setKid stores an application-structured kid value as CBOR bytes. Use the
+  // kid setter when the protocol already defines exact kid bytes.
   setKid<T>(kid: T): this {
     this.setParam(iana.KeyParameterKid, encodeCBOR(kid))
     return this

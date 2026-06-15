@@ -1,20 +1,19 @@
 // (c) 2023-present, LDC Labs. All rights reserved.
 // See the file LICENSE for licensing terms.
 
-import { decode, encode, Token } from 'cborg'
 import {
   concatBytes as nobleConcatBytes,
   utf8ToBytes as nobleUtf8ToBytes
-} from '@noble/hashes/utils'
+} from '@noble/hashes/utils.js'
+import { decode, encode, Token } from 'cborg'
 
 export {
   bytesToHex,
   concatBytes,
   hexToBytes,
   randomBytes,
-  toBytes,
   utf8ToBytes
-} from '@noble/hashes/utils'
+} from '@noble/hashes/utils.js'
 
 export function bytesToBase64(bytes: Uint8Array): string {
   // Build the binary string in chunks to avoid "Maximum call stack size
@@ -184,7 +183,10 @@ export function decodeCBOR<T>(data: Uint8Array): T {
   }) as T
 }
 
-// RFC 8949 Deterministic Encoding: The keys in every map MUST be sorted in the bytewise lexicographic order of their deterministic encodings.
+// encodeCBOR uses the RFC 8949 deterministic map-key order required by RFC
+// 9052 for Sig_structure, Enc_structure, and MAC_structure. Map keys are
+// limited to COSE label types supported by this library: integers and text
+// strings.
 export function encodeCBOR(data: unknown): Uint8Array {
   return encode(data, rfc8949EncodeOptions)
 }

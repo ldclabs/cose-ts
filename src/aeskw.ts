@@ -1,11 +1,11 @@
 // (c) 2023-present, LDC Labs. All rights reserved.
 // See the file LICENSE for licensing terms.
 
-import { aeskw } from '@noble/ciphers/aes'
+import { aeskw } from '@noble/ciphers/aes.js'
 import * as iana from './iana'
-import { RawMap, assertBytes } from './map'
 import { Key, type KeyWrapper } from './key'
-import { randomBytes, decodeCBOR } from './utils'
+import { RawMap, assertBytes } from './map'
+import { decodeCBOR, randomBytes } from './utils'
 
 // AesKwKey implements the AES Key Wrap content key distribution method for COSE
 // as defined in RFC 9053.

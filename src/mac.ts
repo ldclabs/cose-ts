@@ -16,8 +16,11 @@ import {
   CBORSelfPrefix
 } from './tag'
 
-// MacMessage represents a COSE_Mac object, carrying a MAC with one or more
-// recipients that hold the (optionally wrapped) MAC key.
+// MacMessage represents a COSE_Mac object.
+//
+// The payload is MACed with a caller-provided content MAC key. Each Recipient
+// then carries or derives that MAC key for a recipient. Use Mac0Message when
+// the MAC key is known implicitly and no recipient structure is needed.
 //
 // Reference https://datatracker.ietf.org/doc/html/rfc9052#name-maced-message-with-recipien.
 export class MacMessage {
@@ -110,9 +113,9 @@ export class MacMessage {
   ) {
     this.payload = payload
     this.protected = protectedHeader
-      ? new Header(protectedHeader.toRaw())
+      ? new Header(protectedHeader.clone())
       : null
-    this.unprotected = unprotected ? new Header(unprotected.toRaw()) : null
+    this.unprotected = unprotected ? new Header(unprotected.clone()) : null
     this.tag = tag
     this.recipients = recipients
   }
@@ -146,6 +149,9 @@ export class MacMessage {
       this.unprotected = new Header()
     }
 
+    verifyHeaders(this.protected, this.unprotected)
+    assertRecipientMode(this.recipients, 'MacMessage.toBytes')
+
     const protectedBytes = this.protected.toBytes()
     this.tag = contentKey.mac(
       MacMessage.macBytes(this.payload, protectedBytes, externalData)
@@ -175,5 +181,16 @@ function makeMACer(alg: number | string, cek: Uint8Array): Key & MACer {
       return HMACKey.fromSecret(cek, alg as number)
     default:
       throw new Error(`cose-ts: MacMessage: unsupported MAC alg ${alg}`)
+  }
+}
+
+function assertRecipientMode(recipients: Recipient[], fn: string): void {
+  const directCount = recipients.filter(
+    (r) => r.alg() === iana.AlgorithmDirect
+  ).length
+  if (directCount > 0 && recipients.length !== 1) {
+    throw new Error(
+      `cose-ts: ${fn}: direct recipient mode must be the only recipient mode`
+    )
   }
 }

@@ -1,8 +1,8 @@
 // (c) 2023-present, LDC Labs. All rights reserved.
 // See the file LICENSE for licensing terms.
 
-import { hkdf } from '@noble/hashes/hkdf'
-import { sha256, sha512 } from '@noble/hashes/sha2'
+import { hkdf } from '@noble/hashes/hkdf.js'
+import { sha256, sha512 } from '@noble/hashes/sha2.js'
 
 // hkdf256 derives a key from the given secret, salt, info and key size, using HKDF-SHA-256.
 export function hkdf256(

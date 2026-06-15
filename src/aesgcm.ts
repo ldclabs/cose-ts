@@ -1,11 +1,11 @@
 // (c) 2023-present, LDC Labs. All rights reserved.
 // See the file LICENSE for licensing terms.
 
-import { gcm } from '@noble/ciphers/webcrypto'
+import { gcm } from '@noble/ciphers/webcrypto.js'
 import * as iana from './iana'
-import { RawMap, assertBytes } from './map'
 import { Key, type Encryptor } from './key'
-import { randomBytes, decodeCBOR } from './utils'
+import { RawMap, assertBytes } from './map'
+import { decodeCBOR, randomBytes } from './utils'
 
 // TODO: more checks
 // AesGcmKey implements content encryption algorithm AES-GCM for COSE as defined in RFC9053.

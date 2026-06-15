@@ -18,9 +18,11 @@ import {
   CBORSelfPrefix
 } from './tag'
 
-// EncryptMessage represents a COSE_Encrypt object, carrying an AEAD-encrypted
-// payload with one or more recipients that hold the (optionally wrapped)
-// content encryption key.
+// EncryptMessage represents a COSE_Encrypt object.
+//
+// The payload is encrypted with a caller-provided content encryption key (CEK).
+// Each Recipient then carries or derives that CEK for a recipient. This class
+// currently supports direct recipients and AES-KW recipients.
 //
 // Reference https://datatracker.ietf.org/doc/html/rfc9052#name-enveloped-cose-structure.
 export class EncryptMessage {
@@ -118,9 +120,9 @@ export class EncryptMessage {
   ) {
     this.payload = payload
     this.protected = protectedHeader
-      ? new Header(protectedHeader.toRaw())
+      ? new Header(protectedHeader.clone())
       : null
-    this.unprotected = unprotected ? new Header(unprotected.toRaw()) : null
+    this.unprotected = unprotected ? new Header(unprotected.clone()) : null
     this.recipients = recipients
   }
 
@@ -156,6 +158,8 @@ export class EncryptMessage {
       this.unprotected = new Header()
     }
 
+    verifyHeaders(this.protected, this.unprotected)
+    assertRecipientMode(this.recipients, 'EncryptMessage.toBytes')
     assertIVParams(this.protected, this.unprotected, 'toBytes')
 
     const ivSize = contentKey.nonceSize()
@@ -203,6 +207,17 @@ function makeEncryptor(alg: number | string, cek: Uint8Array): Key & Encryptor {
   }
 }
 
+function assertRecipientMode(recipients: Recipient[], fn: string): void {
+  const directCount = recipients.filter(
+    (r) => r.alg() === iana.AlgorithmDirect
+  ).length
+  if (directCount > 0 && recipients.length !== 1) {
+    throw new Error(
+      `cose-ts: ${fn}: direct recipient mode must be the only recipient mode`
+    )
+  }
+}
+
 // assertIVParams enforces the IV rules from RFC 9052 §3.1: the full IV and the
 // Partial IV header parameters MUST NOT both be present. Partial IV is not
 // supported yet, so its presence is rejected outright.
@@ -211,18 +226,10 @@ function assertIVParams(
   unprotectedHeader: Header,
   fn: string
 ): void {
-  const hasIV =
-    protectedHeader.has(iana.HeaderParameterIV) ||
-    unprotectedHeader.has(iana.HeaderParameterIV)
   const hasPartialIV =
     protectedHeader.has(iana.HeaderParameterPartialIV) ||
     unprotectedHeader.has(iana.HeaderParameterPartialIV)
 
-  if (hasIV && hasPartialIV) {
-    throw new Error(
-      `cose-ts: EncryptMessage.${fn}: IV and Partial IV must not both be present`
-    )
-  }
   if (hasPartialIV) {
     throw new Error(
       `cose-ts: EncryptMessage.${fn}: Partial IV is not supported`

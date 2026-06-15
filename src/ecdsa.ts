@@ -1,10 +1,8 @@
 // (c) 2023-present, LDC Labs. All rights reserved.
 // See the file LICENSE for licensing terms.
 
-import { CurveFn } from '@noble/curves/abstract/weierstrass'
-import { p256 } from '@noble/curves/p256'
-import { p384 } from '@noble/curves/p384'
-import { p521 } from '@noble/curves/p521'
+import { ECDSA } from '@noble/curves/abstract/weierstrass.js'
+import { p256, p384, p521 } from '@noble/curves/nist.js'
 import * as iana from './iana'
 import { Key, type Signer, Verifier } from './key'
 import { RawMap, assertBytes } from './map'
@@ -20,7 +18,7 @@ export class ECDSAKey extends Key implements Signer, Verifier {
 
   static generate<T>(alg: number, kid?: T): ECDSAKey {
     const curve = getCurve(alg)
-    return ECDSAKey.fromSecret(curve.utils.randomPrivateKey(), kid)
+    return ECDSAKey.fromSecret(curve.utils.randomSecretKey(), kid)
   }
 
   static fromSecret<T>(secret: Uint8Array, kid?: T): ECDSAKey {
@@ -30,7 +28,7 @@ export class ECDSAKey extends Key implements Signer, Verifier {
     key.alg = alg
 
     const curve = getCurve(alg)
-    if (!curve.utils.isValidPrivateKey(secret)) {
+    if (!curve.utils.isValidSecretKey(secret)) {
       throw new Error(
         `cose-ts: ECDSAKey.fromSecret: secret is not a valid private key for ECDSA alg ${alg}`
       )
@@ -58,7 +56,7 @@ export class ECDSAKey extends Key implements Signer, Verifier {
     const key = new ECDSAKey()
     key.alg = alg
     const curve = getCurve(alg)
-    curve.ProjectivePoint.fromHex(pubkey) // validate public key
+    curve.Point.fromBytes(pubkey) // validate public key
 
     switch (pubkey[0]) {
       case 0x02:
@@ -72,11 +70,11 @@ export class ECDSAKey extends Key implements Signer, Verifier {
       case 0x04:
         key.setParam(
           iana.EC2KeyParameterX,
-          pubkey.subarray(1, curve.CURVE.Fp.BYTES + 1)
+          pubkey.subarray(1, curve.Point.Fp.BYTES + 1)
         )
         key.setParam(
           iana.EC2KeyParameterY,
-          pubkey.subarray(curve.CURVE.Fp.BYTES + 1)
+          pubkey.subarray(curve.Point.Fp.BYTES + 1)
         )
         break
       default:
@@ -147,11 +145,11 @@ export class ECDSAKey extends Key implements Signer, Verifier {
         case 0x04:
           key.setParam(
             iana.EC2KeyParameterX,
-            pk.subarray(1, curve.CURVE.Fp.BYTES + 1)
+            pk.subarray(1, curve.Point.Fp.BYTES + 1)
           )
           key.setParam(
             iana.EC2KeyParameterY,
-            pk.subarray(curve.CURVE.Fp.BYTES + 1)
+            pk.subarray(curve.Point.Fp.BYTES + 1)
           )
           break
       }
@@ -169,17 +167,20 @@ export class ECDSAKey extends Key implements Signer, Verifier {
   sign(message: Uint8Array): Uint8Array {
     this.verifyOps(iana.KeyOperationSign)
     const curve = getCurve(this.alg)
-    const sig = curve.sign(message, this.getSecretKey(), {
-      prehash: true
+    return curve.sign(message, this.getSecretKey(), {
+      prehash: true,
+      lowS: false,
+      format: 'compact'
     })
-    return sig.toCompactRawBytes()
   }
 
   verify(message: Uint8Array, signature: Uint8Array): boolean {
     this.verifyOps(iana.KeyOperationVerify)
     const curve = getCurve(this.alg)
     return curve.verify(signature, message, this.getPublicKey(), {
-      prehash: true
+      prehash: true,
+      lowS: false,
+      format: 'compact'
     })
   }
 }
@@ -207,7 +208,7 @@ export function getCrv(alg: number): number {
   }
 }
 
-export function getCurve(alg: number): CurveFn {
+export function getCurve(alg: number): ECDSA {
   switch (alg) {
     case iana.AlgorithmES256:
       return p256
