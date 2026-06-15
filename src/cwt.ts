@@ -15,9 +15,23 @@ import { withTag, CwtPrefix } from './tag'
 
 const cwtMaxClockSkewMinutes = 10
 
-// Claims represents a set of common claims for CWT.
-//
-// Reference https://www.iana.org/assignments/cwt/cwt.xhtml
+/**
+ * Claims represents a set of common claims for CWT.
+ *
+ * Encode claims as the payload of a COSE message, commonly COSE_Sign1, then
+ * apply withCWTTag() when the surrounding protocol expects the CWT tag.
+ *
+ * @example
+ * ```ts
+ * const claims = new Claims()
+ * claims.iss = 'issuer'
+ * claims.aud = 'service'
+ * claims.exp = Math.floor(Date.now() / 1000) + 3600
+ * const token = withCWTTag(new Sign1Message(claims.toBytes()).toBytes(key))
+ * ```
+ *
+ * Reference https://www.iana.org/assignments/cwt/cwt.xhtml
+ */
 export class Claims extends KVMap {
   static fromBytes(data: Uint8Array): Claims {
     return new Claims(decodeCBOR(data))
@@ -122,6 +136,18 @@ export interface ValidatorOpts {
   fixedNow: Date | null
 }
 
+/**
+ * Validator checks CWT time, issuer, and audience claims according to the
+ * provided profile options.
+ *
+ * @example
+ * ```ts
+ * new Validator({
+ *   expectedIssuer: 'issuer',
+ *   expectedAudience: 'service'
+ * }).validate(claims)
+ * ```
+ */
 export class Validator {
   private opts: ValidatorOpts
   constructor(opts?: Partial<ValidatorOpts>) {

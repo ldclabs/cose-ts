@@ -14,12 +14,22 @@ import {
   CBORSelfPrefix
 } from './tag'
 
-// Sign1Message represents a COSE_Sign1 object.
-//
-// The optional externalData argument on toBytes()/fromBytes() is included in
-// the Sig_structure and must match exactly on signing and verification.
-//
-// Reference https://datatracker.ietf.org/doc/html/rfc9052#name-signing-with-one-signer
+/**
+ * Sign1Message represents a COSE_Sign1 object.
+ *
+ * The optional externalData argument on toBytes()/fromBytes() is included in
+ * the Sig_structure and must match exactly on signing and verification.
+ *
+ * @example
+ * ```ts
+ * const key = Ed25519Key.generate()
+ * const aad = utf8ToBytes('profile:v1')
+ * const cose = new Sign1Message(utf8ToBytes('hello')).toBytes(key, aad)
+ * const verified = Sign1Message.fromBytes(key.public(), cose, aad)
+ * ```
+ *
+ * Reference https://datatracker.ietf.org/doc/html/rfc9052#name-signing-with-one-signer
+ */
 export class Sign1Message {
   payload: Uint8Array
   protected: Header | null = null
@@ -83,6 +93,13 @@ export class Sign1Message {
     return withTag(Sign1MessagePrefix, coseData)
   }
 
+  /**
+   * @param payload - The payload bytes to sign.
+   * @param protectedHeader - Optional protected (authenticated) header. When
+   *   omitted, `toBytes` creates one and sets `alg` from the signing key.
+   * @param unprotected - Optional unprotected header. When omitted, `toBytes`
+   *   creates one and copies the key's `kid` if present.
+   */
   constructor(
     payload: Uint8Array,
     protectedHeader?: Header,

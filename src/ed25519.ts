@@ -8,17 +8,44 @@ import { RawMap, assertBytes } from './map'
 import { decodeCBOR, randomBytes } from './utils'
 
 // TODO: more checks
-// Ed25519Key implements signature algorithm Ed25519 for COSE as defined in RFC9053.
-// https://datatracker.ietf.org/doc/html/rfc9053#name-edwards-curve-digital-signa.
+/**
+ * Ed25519Key implements the Ed25519 signature algorithm (EdDSA) for COSE, as
+ * defined in RFC 9053. Use it with {@link Sign1Message} or {@link SignMessage}.
+ *
+ * Construction signature: `generate(kid?)` — the algorithm is fixed, so the
+ * first argument is the optional key id, not the algorithm.
+ *
+ * @example
+ * ```ts
+ * const key = Ed25519Key.generate('signing-key-1')
+ * const cose = new Sign1Message(payload).toBytes(key)
+ * Sign1Message.fromBytes(key.public(), cose)
+ * ```
+ *
+ * @see https://datatracker.ietf.org/doc/html/rfc9053#name-edwards-curve-digital-signa
+ */
 export class Ed25519Key extends Key implements Signer, Verifier {
+  /** Decodes a COSE_Key from CBOR bytes into an Ed25519Key. */
   static fromBytes(data: Uint8Array): Ed25519Key {
     return new Ed25519Key(decodeCBOR(data))
   }
 
+  /**
+   * Generates a new Ed25519 private key from a random 32-byte seed.
+   *
+   * @param kid - Optional key id; stored CBOR-encoded in the COSE_Key and
+   *   copied into the unprotected header by message helpers.
+   */
   static generate<T>(kid?: T): Ed25519Key {
     return Ed25519Key.fromSecret(randomBytes(32), kid)
   }
 
+  /**
+   * Imports an Ed25519 private key from a raw 32-byte seed.
+   *
+   * @param secret - The 32-byte Ed25519 seed (private key).
+   * @param kid - Optional key id.
+   */
   static fromSecret<T>(secret: Uint8Array, kid?: T): Ed25519Key {
     assertBytes(secret, 'secret')
     if (secret.length !== 32) {
@@ -35,6 +62,12 @@ export class Ed25519Key extends Key implements Signer, Verifier {
     return key
   }
 
+  /**
+   * Imports an Ed25519 public (verify-only) key from a raw 32-byte point.
+   *
+   * @param pubkey - The 32-byte Ed25519 public key.
+   * @param kid - Optional key id.
+   */
   static fromPublic<T>(pubkey: Uint8Array, kid?: T): Ed25519Key {
     assertBytes(pubkey, 'public key')
     if (pubkey.length !== 32) {
@@ -72,6 +105,10 @@ export class Ed25519Key extends Key implements Signer, Verifier {
     return ed25519.getPublicKey(this.getSecretKey())
   }
 
+  /**
+   * Returns a verify-only copy of this key: the private seed is removed and
+   * `key_ops` (if present) is narrowed to verify.
+   */
   public(): Ed25519Key {
     const key = new Ed25519Key(this.clone())
     if (key.has(iana.OKPKeyParameterD)) {

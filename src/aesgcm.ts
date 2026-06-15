@@ -8,17 +8,47 @@ import { RawMap, assertBytes } from './map'
 import { decodeCBOR, randomBytes } from './utils'
 
 // TODO: more checks
-// AesGcmKey implements content encryption algorithm AES-GCM for COSE as defined in RFC9053.
-// https://datatracker.ietf.org/doc/html/rfc9053#name-aes-gcm.
+/**
+ * AesGcmKey implements the AES-GCM content encryption algorithm for COSE, as
+ * defined in RFC 9053. Use it as the content key with {@link Encrypt0Message}
+ * or {@link EncryptMessage}.
+ *
+ * Construction signature: `generate(alg, kid?)` — the first argument is the
+ * algorithm (`A128GCM`/`A192GCM`/`A256GCM`), which selects the key size.
+ *
+ * @example
+ * ```ts
+ * const key = AesGcmKey.generate(iana.AlgorithmA128GCM)
+ * const cose = await new Encrypt0Message(payload).toBytes(key)
+ * const out = await Encrypt0Message.fromBytes(key, cose)
+ * ```
+ *
+ * @see https://datatracker.ietf.org/doc/html/rfc9053#name-aes-gcm
+ */
 export class AesGcmKey extends Key implements Encryptor {
+  /** Decodes a COSE_Key from CBOR bytes into an AesGcmKey. */
   static fromBytes(data: Uint8Array): AesGcmKey {
     return new AesGcmKey(decodeCBOR(data))
   }
 
+  /**
+   * Generates a new random AES-GCM key for the given algorithm.
+   *
+   * @param alg - The AES-GCM algorithm: `iana.AlgorithmA128GCM`,
+   *   `iana.AlgorithmA192GCM`, or `iana.AlgorithmA256GCM`.
+   * @param kid - Optional key id.
+   */
   static generate<T>(alg: number, kid?: T): AesGcmKey {
     return AesGcmKey.fromSecret(randomBytes(getKeySize(alg)), kid)
   }
 
+  /**
+   * Imports an AES-GCM key from raw bytes. The algorithm is inferred from the
+   * key length (16 → A128GCM, 24 → A192GCM, 32 → A256GCM).
+   *
+   * @param secret - The raw key bytes (16, 24, or 32 bytes).
+   * @param kid - Optional key id.
+   */
   static fromSecret<T>(secret: Uint8Array, kid?: T): AesGcmKey {
     const alg = getAlg(assertBytes(secret, 'secret'))
     const key = new AesGcmKey()

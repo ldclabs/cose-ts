@@ -14,13 +14,23 @@ import {
   CBORSelfPrefix
 } from './tag'
 
-// Mac0Message represents a COSE_Mac0 object.
-//
-// Use this structure when the MAC key is known implicitly. The tag covers the
-// protected header bytes, optional externalData, and payload through the RFC
-// 9052 MAC_structure.
-//
-// Reference https://datatracker.ietf.org/doc/html/rfc9052#name-maced-messages-with-implici.
+/**
+ * Mac0Message represents a COSE_Mac0 object.
+ *
+ * Use this structure when the MAC key is known implicitly. The tag covers the
+ * protected header bytes, optional externalData, and payload through the RFC
+ * 9052 MAC_structure.
+ *
+ * @example
+ * ```ts
+ * const key = HMACKey.generate(iana.AlgorithmHMAC_256_256)
+ * const aad = utf8ToBytes('profile:v1')
+ * const cose = new Mac0Message(payload).toBytes(key, aad)
+ * const verified = Mac0Message.fromBytes(key, cose, aad)
+ * ```
+ *
+ * Reference https://datatracker.ietf.org/doc/html/rfc9052#name-maced-messages-with-implici.
+ */
 export class Mac0Message {
   payload: Uint8Array
   // protected header parameters: iana.HeaderParameterAlg, iana.HeaderParameterCrit.
@@ -87,6 +97,13 @@ export class Mac0Message {
     return withTag(Mac0MessagePrefix, coseData)
   }
 
+  /**
+   * @param payload - The payload bytes to authenticate.
+   * @param protectedHeader - Optional protected (authenticated) header. When
+   *   omitted, `toBytes` creates one and sets `alg` from the MAC key.
+   * @param unprotected - Optional unprotected header. When omitted, `toBytes`
+   *   creates one and copies the key's `kid` if present.
+   */
   constructor(
     payload: Uint8Array,
     protectedHeader?: Header,

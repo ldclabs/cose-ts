@@ -6,19 +6,21 @@ import { RawMap, Value, assertBytes, assertIntOrText } from './map'
 import { Key, type KeyWrapper } from './key'
 import * as iana from './iana'
 
-// Recipient represents a COSE_recipient structure used by COSE_Encrypt and
-// COSE_Mac to carry the content encryption/MAC key for a recipient.
-//
-// This class currently provides construction and recovery helpers for the two
-// modes used by the message helpers:
-//   - direct: the caller-provided key is the content key; no key bytes are
-//     transported in the recipient.
-//   - AES-KW: the content key is wrapped by a recipient key-encryption key.
-//
-// Unsupported recipient algorithms can be parsed and kept in the object graph,
-// but recoverCEK() only works for the supported helper modes.
-//
-// Reference https://datatracker.ietf.org/doc/html/rfc9052#name-enveloped-cose-structure.
+/**
+ * Recipient represents a COSE_recipient structure used by {@link EncryptMessage}
+ * and {@link MacMessage} to carry the content encryption/MAC key for a recipient.
+ *
+ * Build recipients with the static factories rather than the constructor:
+ *   - {@link Recipient.direct} — the caller-provided key is the content key; no
+ *     key bytes are transported in the recipient.
+ *   - {@link Recipient.keyWrap} — the content key is wrapped by a recipient
+ *     key-encryption key (KEK), e.g. an {@link AesKwKey}.
+ *
+ * Unsupported recipient algorithms can be parsed and kept in the object graph,
+ * but `recoverCEK()` only works for the supported helper modes.
+ *
+ * @see https://datatracker.ietf.org/doc/html/rfc9052#name-enveloped-cose-structure
+ */
 export class Recipient {
   protected: Header | null
   unprotected: Header | null
@@ -28,9 +30,13 @@ export class Recipient {
   // recipient. It is local-only state and is never serialized.
   key: (Key & KeyWrapper) | null
 
-  // direct creates a recipient for the direct content key distribution method
-  // (RFC 9052 §8.5.1): the content encryption key is the preshared secret and
-  // no key is transported.
+  /**
+   * Creates a recipient for the direct content-key distribution method
+   * (RFC 9052 §8.5.1): the content encryption key is the preshared secret and
+   * no key is transported. A direct recipient must be the only recipient.
+   *
+   * @param kid - Optional key-selection hint placed in the unprotected header.
+   */
   static direct(kid?: Uint8Array): Recipient {
     const unprotected = new Header().setParam(
       iana.HeaderParameterAlg,
@@ -42,9 +48,15 @@ export class Recipient {
     return new Recipient(undefined, unprotected)
   }
 
-  // keyWrap creates a recipient for the AES Key Wrap content key distribution
-  // method (RFC 9052 §8.5.2). The "alg" header parameter is taken from the KEK.
-  // If the KEK has a kid, it is copied as an unprotected key-selection hint.
+  /**
+   * Creates a recipient for the AES Key Wrap content-key distribution method
+   * (RFC 9052 §8.5.2). The `alg` header parameter is taken from the KEK. If the
+   * KEK has a `kid` and no `kid` is passed, it is copied as an unprotected
+   * key-selection hint.
+   *
+   * @param kek - The recipient's key-encryption key, e.g. an {@link AesKwKey}.
+   * @param kid - Optional key-selection hint that overrides the KEK's kid.
+   */
   static keyWrap(kek: Key & KeyWrapper, kid?: Uint8Array): Recipient {
     const unprotected = new Header().setParam(iana.HeaderParameterAlg, kek.alg)
     if (kid) {

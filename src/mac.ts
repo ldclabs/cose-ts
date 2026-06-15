@@ -16,13 +16,29 @@ import {
   CBORSelfPrefix
 } from './tag'
 
-// MacMessage represents a COSE_Mac object.
-//
-// The payload is MACed with a caller-provided content MAC key. Each Recipient
-// then carries or derives that MAC key for a recipient. Use Mac0Message when
-// the MAC key is known implicitly and no recipient structure is needed.
-//
-// Reference https://datatracker.ietf.org/doc/html/rfc9052#name-maced-message-with-recipien.
+/**
+ * MacMessage represents a COSE_Mac object.
+ *
+ * The payload is MACed with a caller-provided content MAC key. Each
+ * {@link Recipient} then carries or derives that MAC key for a recipient. Use
+ * {@link Mac0Message} when the MAC key is known implicitly and no recipient
+ * structure is needed.
+ *
+ * Note the constructor arg order: `(payload, protected?, unprotected?, tag?,
+ * recipients?)`. Recipients are the FIFTH argument; the fourth is the tag.
+ *
+ * @example
+ * ```ts
+ * const macKey = HMACKey.generate(iana.AlgorithmHMAC_256_256)
+ * const kek = AesKwKey.generate(iana.AlgorithmA256KW, 'recipient-1')
+ * const cose = new MacMessage(payload, undefined, undefined, undefined, [
+ *   Recipient.keyWrap(kek)
+ * ]).toBytes(macKey)
+ * MacMessage.fromBytes([kek], cose)
+ * ```
+ *
+ * @see https://datatracker.ietf.org/doc/html/rfc9052#name-maced-message-with-recipien
+ */
 export class MacMessage {
   payload: Uint8Array
   protected: Header | null = null
@@ -104,6 +120,16 @@ export class MacMessage {
     throw new Error('cose-ts: MacMessage.fromBytes: tag mismatch')
   }
 
+  /**
+   * @param payload - The payload bytes to authenticate.
+   * @param protectedHeader - Optional protected (authenticated) header.
+   * @param unprotected - Optional unprotected header.
+   * @param tag - Optional precomputed MAC tag (FOURTH argument); normally left
+   *   as the default and filled in by `toBytes`.
+   * @param recipients - The {@link Recipient} list (FIFTH argument). Use
+   *   `Recipient.keyWrap(kek)` for AES-KW or `Recipient.direct()` for a shared
+   *   key. At least one recipient is required.
+   */
   constructor(
     payload: Uint8Array,
     protectedHeader?: Header,

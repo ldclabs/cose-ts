@@ -34,13 +34,24 @@ export class Signature {
   }
 }
 
-// SignMessage represents a COSE_Sign object, carrying one or more signatures.
-//
-// Use Sign1Message for the common single-signer case. Use this class when a
-// payload needs multiple signatures, potentially with different algorithms or
-// key identifiers.
-//
-// Reference https://datatracker.ietf.org/doc/html/rfc9052#name-signing-with-one-or-more-si.
+/**
+ * SignMessage represents a COSE_Sign object, carrying one or more signatures.
+ *
+ * Use {@link Sign1Message} for the common single-signer case. Use this class
+ * when a payload needs multiple signatures, potentially with different
+ * algorithms or key identifiers.
+ *
+ * @example
+ * ```ts
+ * const a = Ed25519Key.generate()
+ * const b = ECDSAKey.generate(iana.AlgorithmES256)
+ * // With no Signature structures, toBytes() creates one per key.
+ * const cose = new SignMessage(payload).toBytes([a, b])
+ * SignMessage.fromBytes([a.public(), b.public()], cose)
+ * ```
+ *
+ * @see https://datatracker.ietf.org/doc/html/rfc9052#name-signing-with-one-or-more-si
+ */
 export class SignMessage {
   payload: Uint8Array
   protected: Header | null = null
@@ -155,6 +166,13 @@ export class SignMessage {
     )
   }
 
+  /**
+   * @param payload - The payload bytes to sign.
+   * @param protectedHeader - Optional body protected header.
+   * @param unprotected - Optional body unprotected header.
+   * @param signatures - Optional per-signer {@link Signature} structures. When
+   *   empty, `toBytes` creates one per signing key.
+   */
   constructor(
     payload: Uint8Array,
     protectedHeader?: Header,

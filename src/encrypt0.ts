@@ -15,13 +15,23 @@ import {
   CBORSelfPrefix
 } from './tag'
 
-// Encrypt0Message represents a COSE_Encrypt0 object.
-//
-// Use this structure when the recipient already knows the content encryption
-// key. The protected header bytes and optional externalData are authenticated
-// as AEAD additional data.
-//
-// Reference https://datatracker.ietf.org/doc/html/rfc9052#name-single-recipient-encrypted.
+/**
+ * Encrypt0Message represents a COSE_Encrypt0 object.
+ *
+ * Use this structure when the recipient already knows the content encryption
+ * key. The protected header bytes and optional externalData are authenticated
+ * as AEAD additional data.
+ *
+ * @example
+ * ```ts
+ * const key = AesGcmKey.generate(iana.AlgorithmA128GCM)
+ * const aad = utf8ToBytes('profile:v1')
+ * const cose = await new Encrypt0Message(plaintext).toBytes(key, aad)
+ * const decrypted = await Encrypt0Message.fromBytes(key, cose, aad)
+ * ```
+ *
+ * Reference https://datatracker.ietf.org/doc/html/rfc9052#name-single-recipient-encrypted.
+ */
 export class Encrypt0Message {
   payload: Uint8Array
   // protected header parameters: iana.HeaderParameterAlg, iana.HeaderParameterCrit.
@@ -95,6 +105,13 @@ export class Encrypt0Message {
     return withTag(Encrypt0MessagePrefix, coseData)
   }
 
+  /**
+   * @param payload - The plaintext bytes to encrypt.
+   * @param protectedHeader - Optional protected (authenticated) header. When
+   *   omitted, `toBytes` creates one and sets `alg` from the content key.
+   * @param unprotected - Optional unprotected header. `toBytes` puts the
+   *   generated IV here unless one is already set.
+   */
   constructor(
     payload: Uint8Array,
     protectedHeader?: Header,

@@ -8,17 +8,45 @@ import { RawMap, assertBytes } from './map'
 import { decodeCBOR, randomBytes } from './utils'
 
 // TODO: more checks
-// ChaCha20Poly1305Key implements content encryption algorithm ChaCha20/Poly1305 for COSE as defined in RFC9053.
-// https://datatracker.ietf.org/doc/html/rfc9053#name-chacha20-and-poly1305.
+/**
+ * ChaCha20Poly1305Key implements the ChaCha20/Poly1305 content encryption
+ * algorithm for COSE, as defined in RFC 9053. Use it as the content key with
+ * {@link Encrypt0Message} or {@link EncryptMessage}.
+ *
+ * Construction signature: `generate(kid?)` — the algorithm is fixed, so the
+ * first argument is the optional key id, not the algorithm. The key is always
+ * 32 bytes.
+ *
+ * @example
+ * ```ts
+ * const key = ChaCha20Poly1305Key.generate()
+ * const cose = await new Encrypt0Message(payload).toBytes(key)
+ * const out = await Encrypt0Message.fromBytes(key, cose)
+ * ```
+ *
+ * @see https://datatracker.ietf.org/doc/html/rfc9053#name-chacha20-and-poly1305
+ */
 export class ChaCha20Poly1305Key extends Key implements Encryptor {
+  /** Decodes a COSE_Key from CBOR bytes into a ChaCha20Poly1305Key. */
   static fromBytes(data: Uint8Array): ChaCha20Poly1305Key {
     return new ChaCha20Poly1305Key(decodeCBOR(data))
   }
 
+  /**
+   * Generates a new random ChaCha20/Poly1305 key (32 bytes).
+   *
+   * @param kid - Optional key id.
+   */
   static generate<T>(kid?: T): ChaCha20Poly1305Key {
     return ChaCha20Poly1305Key.fromSecret(randomBytes(32), kid)
   }
 
+  /**
+   * Imports a ChaCha20/Poly1305 key from raw bytes.
+   *
+   * @param secret - The 32-byte key.
+   * @param kid - Optional key id.
+   */
   static fromSecret<T>(secret: Uint8Array, kid?: T): ChaCha20Poly1305Key {
     assertBytes(secret, 'secret')
     if (secret.length !== 32) {

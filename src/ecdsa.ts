@@ -9,18 +9,47 @@ import { RawMap, assertBytes } from './map'
 import { decodeCBOR } from './utils'
 
 // TODO: more checks
-// ECDSAKey implements signature algorithm ECDSA for COSE as defined in RFC9053.
-// https://datatracker.ietf.org/doc/html/rfc9053#name-ecdsa.
+/**
+ * ECDSAKey implements the ECDSA signature algorithm for COSE, as defined in
+ * RFC 9053. Use it with {@link Sign1Message} or {@link SignMessage}.
+ *
+ * Construction signature: `generate(alg, kid?)` — the first argument is the
+ * algorithm (`ES256`/`ES384`/`ES512`), which selects the curve.
+ *
+ * @example
+ * ```ts
+ * const key = ECDSAKey.generate(iana.AlgorithmES256, 'signing-key-1')
+ * const cose = new Sign1Message(payload).toBytes(key)
+ * Sign1Message.fromBytes(key.public(), cose)
+ * ```
+ *
+ * @see https://datatracker.ietf.org/doc/html/rfc9053#name-ecdsa
+ */
 export class ECDSAKey extends Key implements Signer, Verifier {
+  /** Decodes a COSE_Key from CBOR bytes into an ECDSAKey. */
   static fromBytes(data: Uint8Array): ECDSAKey {
     return new ECDSAKey(decodeCBOR(data))
   }
 
+  /**
+   * Generates a new ECDSA private key for the given algorithm.
+   *
+   * @param alg - The ECDSA algorithm: `iana.AlgorithmES256`,
+   *   `iana.AlgorithmES384`, or `iana.AlgorithmES512`.
+   * @param kid - Optional key id.
+   */
   static generate<T>(alg: number, kid?: T): ECDSAKey {
     const curve = getCurve(alg)
     return ECDSAKey.fromSecret(curve.utils.randomSecretKey(), kid)
   }
 
+  /**
+   * Imports an ECDSA private key from raw scalar bytes. The algorithm and curve
+   * are inferred from the secret length (32 → ES256, 48 → ES384, ≥65 → ES512).
+   *
+   * @param secret - The raw private scalar bytes.
+   * @param kid - Optional key id.
+   */
   static fromSecret<T>(secret: Uint8Array, kid?: T): ECDSAKey {
     assertBytes(secret, 'secret')
     const alg = getAlg(secret.length)
@@ -41,6 +70,14 @@ export class ECDSAKey extends Key implements Signer, Verifier {
     return key
   }
 
+  /**
+   * Imports an ECDSA public (verify-only) key from a SEC1 point. Compressed
+   * (`0x02`/`0x03`) and uncompressed (`0x04`) encodings are accepted; the
+   * algorithm and curve are inferred from the point length.
+   *
+   * @param pubkey - The SEC1-encoded public key bytes.
+   * @param kid - Optional key id.
+   */
   static fromPublic<T>(pubkey: Uint8Array, kid?: T): ECDSAKey {
     assertBytes(pubkey, 'public key')
     if (pubkey.length < 33) {
@@ -128,6 +165,10 @@ export class ECDSAKey extends Key implements Signer, Verifier {
     return curve.getPublicKey(this.getSecretKey(), true)
   }
 
+  /**
+   * Returns a verify-only copy of this key: the private scalar is removed and
+   * `key_ops` (if present) is narrowed to verify.
+   */
   public(): ECDSAKey {
     const key = new ECDSAKey(this.clone())
     if (key.has(iana.EC2KeyParameterD)) {

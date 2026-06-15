@@ -11,18 +11,52 @@ import { RawMap, assertBytes, assertInt } from './map'
 import { decodeCBOR } from './utils'
 
 // TODO: more checks
-// ECDHKey implements key agreement algorithm ECDH for COSE as defined in RFC9053.
-// https://datatracker.ietf.org/doc/html/rfc9053#name-direct-key-agreement.
+/**
+ * ECDHKey implements the ECDH key-agreement algorithm for COSE, as defined in
+ * RFC 9053. The shared secret it derives is typically fed into a KDF
+ * (see `@ldclabs/cose-ts/hkdf` and `@ldclabs/cose-ts/kdfcontext`).
+ *
+ * Construction signatures put the CURVE first on every factory:
+ * `generate(crv, kid?)`, `fromSecret(crv, secret, kid?)`,
+ * `fromPublic(crv, pubkey, kid?)`. This differs from the other key types — see
+ * the key-construction cheat sheet in `docs/agent-guide.md`.
+ *
+ * @example
+ * ```ts
+ * const alice = ECDHKey.generate(iana.EllipticCurveX25519)
+ * const bob = ECDHKey.generate(iana.EllipticCurveX25519)
+ * const shared = alice.ecdh(bob.public()) // equals bob.ecdh(alice.public())
+ * ```
+ *
+ * @see https://datatracker.ietf.org/doc/html/rfc9053#name-direct-key-agreement
+ */
 export class ECDHKey extends Key implements ECDHer {
+  /** Decodes a COSE_Key from CBOR bytes into an ECDHKey. */
   static fromBytes(data: Uint8Array): ECDHKey {
     return new ECDHKey(decodeCBOR(data))
   }
 
+  /**
+   * Generates a new ECDH key for the given curve.
+   *
+   * @param crv - The curve: `iana.EllipticCurveP_256`, `EllipticCurveP_384`,
+   *   `EllipticCurveP_521`, or `EllipticCurveX25519`.
+   * @param kid - Optional key id.
+   */
   static generate<T>(crv: number, kid?: T): ECDHKey {
     const curve = getCurve(crv)
     return ECDHKey.fromSecret(crv, curve.utils.randomSecretKey(), kid)
   }
 
+  /**
+   * Imports an ECDH private key for the given curve.
+   *
+   * Note: the curve is the FIRST parameter and the secret is the second.
+   *
+   * @param crv - The curve, e.g. `iana.EllipticCurveP_256`.
+   * @param secret - The raw private key bytes for that curve.
+   * @param kid - Optional key id.
+   */
   static fromSecret<T>(crv: number, secret: Uint8Array, kid?: T): ECDHKey {
     assertBytes(secret, 'secret')
     const key = new ECDHKey()
@@ -49,6 +83,16 @@ export class ECDHKey extends Key implements ECDHer {
     return key
   }
 
+  /**
+   * Imports an ECDH public key for the given curve.
+   *
+   * Note: the curve is the FIRST parameter and the public key is the second.
+   *
+   * @param crv - The curve, e.g. `iana.EllipticCurveP_256`.
+   * @param pubkey - The public key bytes (SEC1 point for NIST curves, raw
+   *   32 bytes for X25519).
+   * @param kid - Optional key id.
+   */
   static fromPublic<T>(crv: number, pubkey: Uint8Array, kid?: T): ECDHKey {
     assertBytes(pubkey, 'public key')
     const key = new ECDHKey()
@@ -111,6 +155,13 @@ export class ECDHKey extends Key implements ECDHer {
     }
   }
 
+  /**
+   * Derives the ECDH shared secret between this private key and a remote public
+   * key. Both keys must use the same curve. The result is the raw shared secret;
+   * run it through a KDF before using it as a content key.
+   *
+   * @param remotePublic - The remote party's public key (same curve).
+   */
   ecdh(remotePublic: Key): Uint8Array {
     const remote =
       remotePublic instanceof ECDHKey
@@ -170,6 +221,10 @@ export class ECDHKey extends Key implements ECDHer {
     }
   }
 
+  /**
+   * Returns a public copy of this key with the private scalar removed and
+   * `key_ops` cleared. Pass this to a peer's {@link ECDHKey.ecdh}.
+   */
   public(): ECDHKey {
     const key = new ECDHKey(this.clone())
     if (key.has(iana.EC2KeyParameterD)) {

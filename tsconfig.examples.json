@@ -1,0 +1,12 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "rootDir": ".",
+    "paths": {
+      "@ldclabs/cose-ts": ["./src/index.ts"],
+      "@ldclabs/cose-ts/*": ["./src/*"]
+    }
+  },
+  "include": ["examples/**/*.ts", "vitest.config.ts"]
+}

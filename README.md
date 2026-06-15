@@ -21,6 +21,22 @@ The package is ESM-only and requires Node.js 20.19+ or a modern browser runtime.
 Import from subpath modules such as `@ldclabs/cose-ts/sign1`; the package root
 is not a barrel entry point.
 
+## AI Agent Guide
+
+If you are using an AI coding agent, start with [AGENTS.md](AGENTS.md) and
+[docs/agent-guide.md](docs/agent-guide.md). The short contract is: choose the
+COSE structure first, import from a package subpath, keep `externalData`
+identical across encode/decode paths, and run `pnpm run examples` when snippets
+or public APIs change.
+
+Runnable recipes live in [examples](examples/):
+
+- `sign1-ed25519.ts`
+- `encrypt0-aesgcm.ts`
+- `encrypt-aeskw.ts`
+- `mac0-hmac.ts`
+- `cwt-sign1.ts`
+
 ## What It Provides
 
 COSE defines compact CBOR structures for signatures, encryption, MACs, keys,
@@ -228,13 +244,14 @@ key-wrap helpers.
 
 ```bash
 pnpm install
+pnpm run examples
 pnpm test
 pnpm run build
 pnpm run lint
 ```
 
-Tests include RFC 9052 structure checks, RFC example vectors, and coverage for
-encoding edge cases.
+Tests include RFC 9052 structure checks, RFC example vectors, runnable examples,
+agent-oriented misuse checks, and coverage for encoding edge cases.
 
 ## Security Notes
 

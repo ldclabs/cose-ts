@@ -7,18 +7,49 @@ import { Key, type KeyWrapper } from './key'
 import { RawMap, assertBytes } from './map'
 import { decodeCBOR, randomBytes } from './utils'
 
-// AesKwKey implements the AES Key Wrap content key distribution method for COSE
-// as defined in RFC 9053.
-// https://datatracker.ietf.org/doc/html/rfc9053#name-aes-key-wrap.
+/**
+ * AesKwKey implements the AES Key Wrap content-key distribution method for
+ * COSE, as defined in RFC 9053. Use it as a recipient key-encryption key (KEK)
+ * via `Recipient.keyWrap(kek)` with {@link EncryptMessage} or {@link MacMessage}.
+ *
+ * Construction signature: `generate(alg, kid?)` — the first argument is the
+ * algorithm (`A128KW`/`A192KW`/`A256KW`), which selects the key size.
+ *
+ * @example
+ * ```ts
+ * const kek = AesKwKey.generate(iana.AlgorithmA256KW, 'recipient-1')
+ * const cose = await new EncryptMessage(payload, undefined, undefined, [
+ *   Recipient.keyWrap(kek)
+ * ]).toBytes(cek)
+ * const out = await EncryptMessage.fromBytes([kek], cose)
+ * ```
+ *
+ * @see https://datatracker.ietf.org/doc/html/rfc9053#name-aes-key-wrap
+ */
 export class AesKwKey extends Key implements KeyWrapper {
+  /** Decodes a COSE_Key from CBOR bytes into an AesKwKey. */
   static fromBytes(data: Uint8Array): AesKwKey {
     return new AesKwKey(decodeCBOR(data))
   }
 
+  /**
+   * Generates a new random AES-KW key-encryption key for the given algorithm.
+   *
+   * @param alg - The AES-KW algorithm: `iana.AlgorithmA128KW`,
+   *   `iana.AlgorithmA192KW`, or `iana.AlgorithmA256KW`.
+   * @param kid - Optional key id.
+   */
   static generate<T>(alg: number, kid?: T): AesKwKey {
     return AesKwKey.fromSecret(randomBytes(getKeySize(alg)), kid)
   }
 
+  /**
+   * Imports an AES-KW key from raw bytes. The algorithm is inferred from the
+   * key length (16 → A128KW, 24 → A192KW, 32 → A256KW).
+   *
+   * @param secret - The raw key bytes (16, 24, or 32 bytes).
+   * @param kid - Optional key id.
+   */
   static fromSecret<T>(secret: Uint8Array, kid?: T): AesKwKey {
     const alg = getAlg(assertBytes(secret, 'secret'))
     const key = new AesKwKey()

@@ -12,6 +12,10 @@
   },
   "files": [
     "dist",
+    "docs",
+    "examples/*.ts",
+    "examples/README.md",
+    "AGENTS.md",
     "package.json",
     "pnpm-lock.yaml",
     "LICENSE",
@@ -160,9 +164,10 @@
   "scripts": {
     "build": "npm run clean && tsc -p tsconfig.json",
     "clean": "rm -rf dist",
+    "examples": "tsc -p tsconfig.examples.json --noEmit && vitest examples --run",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
-    "format": "prettier --write \"src/**/*.{json,js,jsx,ts,tsx,css,scss,svelte}\"",
+    "format": "prettier --write \"{src,examples}/**/*.{json,js,jsx,ts,tsx,css,scss,svelte}\" \"*.{json,js,ts,md}\" \"docs/**/*.md\"",
     "ncu": "npx npm-check-updates -u",
     "test": "vitest src --coverage --run"
   },

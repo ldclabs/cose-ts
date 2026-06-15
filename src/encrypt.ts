@@ -18,13 +18,25 @@ import {
   CBORSelfPrefix
 } from './tag'
 
-// EncryptMessage represents a COSE_Encrypt object.
-//
-// The payload is encrypted with a caller-provided content encryption key (CEK).
-// Each Recipient then carries or derives that CEK for a recipient. This class
-// currently supports direct recipients and AES-KW recipients.
-//
-// Reference https://datatracker.ietf.org/doc/html/rfc9052#name-enveloped-cose-structure.
+/**
+ * EncryptMessage represents a COSE_Encrypt object.
+ *
+ * The payload is encrypted with a caller-provided content encryption key (CEK).
+ * Each Recipient then carries or derives that CEK for a recipient. This class
+ * currently supports direct recipients and AES-KW recipients.
+ *
+ * @example
+ * ```ts
+ * const cek = AesGcmKey.generate(iana.AlgorithmA256GCM)
+ * const kek = AesKwKey.generate(iana.AlgorithmA256KW, 'recipient-1')
+ * const cose = await new EncryptMessage(payload, undefined, undefined, [
+ *   Recipient.keyWrap(kek)
+ * ]).toBytes(cek, aad)
+ * const decrypted = await EncryptMessage.fromBytes([kek], cose, aad)
+ * ```
+ *
+ * Reference https://datatracker.ietf.org/doc/html/rfc9052#name-enveloped-cose-structure.
+ */
 export class EncryptMessage {
   payload: Uint8Array
   protected: Header | null = null
@@ -112,6 +124,16 @@ export class EncryptMessage {
     throw new Error('cose-ts: EncryptMessage.fromBytes: decryption failed')
   }
 
+  /**
+   * @param payload - The plaintext bytes to encrypt.
+   * @param protectedHeader - Optional protected (authenticated) header. Pass
+   *   `undefined` to let `toBytes` set `alg` from the content key.
+   * @param unprotected - Optional unprotected header. Pass `undefined` to let
+   *   `toBytes` place the generated IV here.
+   * @param recipients - The {@link Recipient} list (FOURTH argument). Use
+   *   `Recipient.keyWrap(kek)` for AES-KW or `Recipient.direct()` for a shared
+   *   key. At least one recipient is required.
+   */
   constructor(
     payload: Uint8Array,
     protectedHeader?: Header,
