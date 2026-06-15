@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      packages: write
+      id-token: write
 
     steps:
       - run: npm install -g pnpm
@@ -25,6 +25,5 @@ jobs:
           pnpm lint
           pnpm test
           pnpm build
-      - run: npm publish .
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      - run: npm install -g npm@latest
+      - run: npm publish --provenance .
